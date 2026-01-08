@@ -1,16 +1,19 @@
 apiVersion: apiextensions.crossplane.io/v2
 kind: CompositeResourceDefinition
 metadata:
-  name: tenantenvironments.platform.openco.tech
+  name: appenvironments.platform.openco.tech
 spec:
   group: platform.openco.tech
   names:
-    kind: TenantEnvironment
-    plural: tenantenvironments
+    kind: AppEnvironment
+    plural: appenvironments
+  claimNames:
+    kind: AppClaim
+    plural: appclaims
   scope: Namespaced
   defaultCompositeDeletePolicy: Background
   defaultCompositionRef:
-    name: tenantenvironment.platform.openco.tech
+    name: appenvironment.platform.openco.tech
   defaultCompositionUpdatePolicy: Automatic
   versions:
     - name: v1alpha1
@@ -18,12 +21,12 @@ spec:
       referenceable: true
       schema:
         openAPIV3Schema:
-          description: A TenantEnvironment provides a complete GCP environment for a service
+          description: An AppEnvironment provides a complete GCP environment for a service
           type: object
           properties:
             spec:
               type: object
-              description: Specification of the TenantEnvironment
+              description: Specification of the AppEnvironment
               properties:
                 appName:
                   type: string
@@ -33,10 +36,11 @@ spec:
                   maxLength: 63
                 environment:
                   type: string
-                  description: The deployment environment (hml or prod)
+                  description: The deployment environment (hml, prod or sandbox)
                   enum:
                     - hml
                     - prod
+                    - sandbox
                 teamId:
                   type: string
                   description: Team identifier for billing and ownership (e.g., finance)
@@ -46,6 +50,37 @@ spec:
                   type: string
                   description: Cost center for resource tagging
                   minLength: 1
+                region:
+                  type: string
+                  description: GCP Region
+                  default: "us-east4"
+                cloudRun:
+                  type: object
+                  description: Cloud Run configuration
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: true
+                    port:
+                      type: integer
+                      default: 8080
+                    public:
+                      type: boolean
+                      default: false
+                secretManager:
+                  type: object
+                  description: Secret Manager configuration
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: true
+                    secrets:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
               required:
                 - appName
                 - environment
@@ -53,17 +88,20 @@ spec:
                 - costCenter
             status:
               type: object
-              description: Status of the TenantEnvironment
+              description: Status of the AppEnvironment
               properties:
                 projectId:
                   type: string
                   description: The GCP Project ID
                 serviceAccountEmail:
                   type: string
-                  description: The service account email for the tenant
+                  description: The service account email for the app
                 artifactRegistryUrl:
                   type: string
                   description: The Artifact Registry URL for container images
+                cloudRunUrl:
+                  type: string
+                  description: The Cloud Run service URL
                 ready:
                   type: boolean
                   description: Whether all resources are ready

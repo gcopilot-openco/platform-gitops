@@ -1,0 +1,51 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: gcpartifacts.platform.openco.tech
+spec:
+  group: platform.openco.tech
+  names:
+    kind: GCPArtifact
+    plural: gcpartifacts
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                appName:
+                  type: string
+                projectId:
+                  type: string
+                region:
+                  type: string
+                  default: "us-east4"
+                format:
+                  type: string
+                  enum: [DOCKER, NPM, MAVEN, PYTHON]
+                  default: "DOCKER"
+                teamId:
+                  type: string
+                environment:
+                  type: string
+                costCenter:
+                  type: string
+                writerServiceAccountEmail:
+                  type: string
+              required:
+                - appName
+                - projectId
+            status:
+              type: object
+              properties:
+                repositoryUrl:
+                  type: string
+                repositoryName:
+                  type: string
+                ready:
+                  type: boolean

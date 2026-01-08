@@ -1,0 +1,55 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: gcpcloudrun.platform.openco.tech
+spec:
+  compositeTypeRef:
+    apiVersion: platform.openco.tech/v1alpha1
+    kind: GCPCloudRun
+  mode: Pipeline
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: cloudrun-service
+            base:
+              apiVersion: cloudrun.gcp.m.upbound.io/v1beta1
+              kind: Service
+              spec:
+                forProvider:
+                  location: us-east4
+                  template:
+                    - containers:
+                        - image: us-docker.pkg.dev/cloudrun/container/hello
+            patches:
+              - fromFieldPath: spec.appName
+                toFieldPath: metadata.name
+              - fromFieldPath: spec.projectId
+                toFieldPath: spec.forProvider.project
+              - fromFieldPath: spec.region
+                toFieldPath: spec.forProvider.location
+              - fromFieldPath: spec.serviceAccountEmail
+                toFieldPath: spec.forProvider.template[0].serviceAccount
+              - fromFieldPath: spec.image
+                toFieldPath: spec.forProvider.template[0].containers[0].image
+              - fromFieldPath: spec.port
+                toFieldPath: spec.forProvider.template[0].containers[0].ports[0].containerPort
+              - fromFieldPath: spec.cpu
+                toFieldPath: spec.forProvider.template[0].containers[0].resources[0].limits.cpu
+              - fromFieldPath: spec.memory
+                toFieldPath: spec.forProvider.template[0].containers[0].resources[0].limits.memory
+              - fromFieldPath: spec.minInstances
+                toFieldPath: spec.forProvider.template[0].scaling[0].minInstanceCount
+              - fromFieldPath: spec.maxInstances
+                toFieldPath: spec.forProvider.template[0].scaling[0].maxInstanceCount
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.atProvider.uri
+                toFieldPath: status.serviceUrl
+
+    - step: auto-ready
+      functionRef:
+        name: function-auto-ready

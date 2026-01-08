@@ -1,0 +1,55 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: gcpartifact.platform.openco.tech
+spec:
+  compositeTypeRef:
+    apiVersion: platform.openco.tech/v1alpha1
+    kind: GCPArtifact
+  mode: Pipeline
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: artifact-registry
+            base:
+              apiVersion: artifact.gcp.m.upbound.io/v1beta1
+              kind: RegistryRepository
+              spec:
+                forProvider:
+                  format: DOCKER
+                  location: us-east4
+            patches:
+              - fromFieldPath: spec.appName
+                toFieldPath: metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      type: Format
+                      fmt: 'repo-%s'
+              - fromFieldPath: spec.projectId
+                toFieldPath: spec.forProvider.project
+              - fromFieldPath: spec.region
+                toFieldPath: spec.forProvider.location
+              - fromFieldPath: spec.format
+                toFieldPath: spec.forProvider.format
+              - fromFieldPath: spec.teamId
+                toFieldPath: metadata.labels[team]
+              - fromFieldPath: spec.environment
+                toFieldPath: metadata.labels[env]
+              - fromFieldPath: spec.costCenter
+                toFieldPath: metadata.labels[cost-center]
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.atProvider.repositoryUrl
+                toFieldPath: status.repositoryUrl
+              - type: ToCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: status.repositoryName
+
+    - step: auto-ready
+      functionRef:
+        name: function-auto-ready

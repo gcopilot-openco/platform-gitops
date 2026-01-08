@@ -1,11 +1,11 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: tenantenvironment.platform.openco.tech
+  name: gcpproject.platform.openco.tech
 spec:
   compositeTypeRef:
     apiVersion: platform.openco.tech/v1alpha1
-    kind: TenantEnvironment
+    kind: GCPProject
   mode: Pipeline
   pipeline:
     - step: patch-and-transform
@@ -15,21 +15,14 @@ spec:
         apiVersion: pt.fn.crossplane.io/v1beta1
         kind: Resources
         resources:
-          # GCP Project
-          - name: gcp-project
+          - name: project
             base:
               apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
               kind: Project
-              metadata:
-                labels:
-                  component: gcp-project
               spec:
                 forProvider:
                   autoCreateNetwork: false
-                  billingAccount: '0182B4-2FC191-0FCF10'
-                  orgId: '875387917387'
             patches:
-              # Kubernetes resource name: prj-{environment}-{appName}
               - type: CombineFromComposite
                 combine:
                   variables:
@@ -39,7 +32,6 @@ spec:
                   string:
                     fmt: 'prj-%s-%s'
                 toFieldPath: metadata.name
-              # GCP display name: prj-{environment}-{appName}
               - type: CombineFromComposite
                 combine:
                   variables:
@@ -49,7 +41,6 @@ spec:
                   string:
                     fmt: 'prj-%s-%s'
                 toFieldPath: spec.forProvider.name
-              # GCP project ID: prj-{environment}-{appName}
               - type: CombineFromComposite
                 combine:
                   variables:
@@ -59,45 +50,32 @@ spec:
                   string:
                     fmt: 'prj-%s-%s'
                 toFieldPath: spec.forProvider.projectId
+              - fromFieldPath: spec.billingAccount
+                toFieldPath: spec.forProvider.billingAccount
+              - fromFieldPath: spec.orgId
+                toFieldPath: spec.forProvider.orgId
               - fromFieldPath: spec.environment
                 toFieldPath: metadata.labels[env]
               - fromFieldPath: spec.teamId
                 toFieldPath: metadata.labels[team]
               - fromFieldPath: spec.costCenter
                 toFieldPath: metadata.labels[cost-center]
-              - fromFieldPath: spec.appName
-                toFieldPath: metadata.labels[app]
-              - fromFieldPath: metadata.uid
-                toFieldPath: metadata.ownerReferences[0].uid
-              - fromFieldPath: metadata.name
-                toFieldPath: metadata.ownerReferences[0].name
-              - fromFieldPath: metadata.creationTimestamp
-                toFieldPath: metadata.ownerReferences[0].blockOwnerDeletion
-            connectionDetails:
-              - fromFieldPath: status.atProvider.projectNumber
-                name: gcp-project-id
-                type: FromFieldPath
+              - type: ToCompositeFieldPath
+                fromFieldPath: spec.forProvider.projectId
+                toFieldPath: status.projectId
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.atProvider.number
+                toFieldPath: status.projectNumber
 
-          # Enable Required APIs
           - name: compute-api
             base:
               apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
               kind: ProjectService
-              metadata:
-                labels:
-                  component: api-service
               spec:
                 forProvider:
                   service: compute.googleapis.com
                   disableOnDestroy: false
             patches:
-              - fromFieldPath: spec.appName
-                toFieldPath: metadata.name
-                transforms:
-                  - type: string
-                    string:
-                      type: Format
-                      fmt: 'compute-api-%s'
               - type: CombineFromComposite
                 combine:
                   variables:
@@ -107,26 +85,24 @@ spec:
                   string:
                     fmt: 'prj-%s-%s'
                 toFieldPath: spec.forProvider.project
+              - type: CombineFromComposite
+                combine:
+                  variables:
+                    - fromFieldPath: spec.appName
+                  strategy: string
+                  string:
+                    fmt: 'compute-api-%s'
+                toFieldPath: metadata.name
 
           - name: run-api
             base:
               apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
               kind: ProjectService
-              metadata:
-                labels:
-                  component: api-service
               spec:
                 forProvider:
                   service: run.googleapis.com
                   disableOnDestroy: false
             patches:
-              - fromFieldPath: spec.appName
-                toFieldPath: metadata.name
-                transforms:
-                  - type: string
-                    string:
-                      type: Format
-                      fmt: 'run-api-%s'
               - type: CombineFromComposite
                 combine:
                   variables:
@@ -136,26 +112,24 @@ spec:
                   string:
                     fmt: 'prj-%s-%s'
                 toFieldPath: spec.forProvider.project
+              - type: CombineFromComposite
+                combine:
+                  variables:
+                    - fromFieldPath: spec.appName
+                  strategy: string
+                  string:
+                    fmt: 'run-api-%s'
+                toFieldPath: metadata.name
 
           - name: artifactregistry-api
             base:
               apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
               kind: ProjectService
-              metadata:
-                labels:
-                  component: api-service
               spec:
                 forProvider:
                   service: artifactregistry.googleapis.com
                   disableOnDestroy: false
             patches:
-              - fromFieldPath: spec.appName
-                toFieldPath: metadata.name
-                transforms:
-                  - type: string
-                    string:
-                      type: Format
-                      fmt: 'artifactregistry-api-%s'
               - type: CombineFromComposite
                 combine:
                   variables:
@@ -165,26 +139,24 @@ spec:
                   string:
                     fmt: 'prj-%s-%s'
                 toFieldPath: spec.forProvider.project
+              - type: CombineFromComposite
+                combine:
+                  variables:
+                    - fromFieldPath: spec.appName
+                  strategy: string
+                  string:
+                    fmt: 'artifactregistry-api-%s'
+                toFieldPath: metadata.name
 
           - name: iam-api
             base:
               apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
               kind: ProjectService
-              metadata:
-                labels:
-                  component: api-service
               spec:
                 forProvider:
                   service: iam.googleapis.com
                   disableOnDestroy: false
             patches:
-              - fromFieldPath: spec.appName
-                toFieldPath: metadata.name
-                transforms:
-                  - type: string
-                    string:
-                      type: Format
-                      fmt: 'iam-api-%s'
               - type: CombineFromComposite
                 combine:
                   variables:
@@ -194,27 +166,24 @@ spec:
                   string:
                     fmt: 'prj-%s-%s'
                 toFieldPath: spec.forProvider.project
+              - type: CombineFromComposite
+                combine:
+                  variables:
+                    - fromFieldPath: spec.appName
+                  strategy: string
+                  string:
+                    fmt: 'iam-api-%s'
+                toFieldPath: metadata.name
 
-          # Service Account
-          - name: service-account
+          - name: secretmanager-api
             base:
               apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
-              kind: ServiceAccount
-              metadata:
-                labels:
-                  component: service-account
+              kind: ProjectService
               spec:
                 forProvider:
-                  displayName: Service account for tenant
-                  description: Runtime identity for the tenant service
+                  service: secretmanager.googleapis.com
+                  disableOnDestroy: false
             patches:
-              - fromFieldPath: spec.appName
-                toFieldPath: metadata.name
-                transforms:
-                  - type: string
-                    string:
-                      type: Format
-                      fmt: 'sa-%s'
               - type: CombineFromComposite
                 combine:
                   variables:
@@ -224,59 +193,15 @@ spec:
                   string:
                     fmt: 'prj-%s-%s'
                 toFieldPath: spec.forProvider.project
-              - fromFieldPath: spec.appName
-                toFieldPath: spec.forProvider.displayName
-                transforms:
-                  - type: string
-                    string:
-                      type: Format
-                      fmt: 'Service account for %s'
-              - fromFieldPath: spec.teamId
-                toFieldPath: metadata.labels[team]
-              - fromFieldPath: spec.environment
-                toFieldPath: metadata.labels[env]
-            connectionDetails:
-              - fromFieldPath: status.atProvider.email
-                name: gcp-service-account-email
-                type: FromFieldPath
+              - type: CombineFromComposite
+                combine:
+                  variables:
+                    - fromFieldPath: spec.appName
+                  strategy: string
+                  string:
+                    fmt: 'secretmanager-api-%s'
+                toFieldPath: metadata.name
 
-          # Artifact Registry Repository
-          - name: artifact-registry
-            base:
-              apiVersion: artifact.gcp.m.upbound.io/v1beta1
-              kind: RegistryRepository
-              metadata:
-                labels:
-                  component: artifact-registry
-              spec:
-                forProvider:
-                  format: DOCKER
-                  location: us-central1
-                  description: Container image repository for the tenant service
-            patches:
-              - fromFieldPath: spec.appName
-                toFieldPath: metadata.name
-                transforms:
-                  - type: string
-                    string:
-                      type: Format
-                      fmt: 'repo-%s'
-              - type: CombineFromComposite
-                combine:
-                  variables:
-                    - fromFieldPath: spec.environment
-                    - fromFieldPath: spec.appName
-                  strategy: string
-                  string:
-                    fmt: 'prj-%s-%s'
-                toFieldPath: spec.forProvider.project
-              - fromFieldPath: spec.teamId
-                toFieldPath: metadata.labels[team]
-              - fromFieldPath: spec.environment
-                toFieldPath: metadata.labels[env]
-              - fromFieldPath: spec.costCenter
-                toFieldPath: metadata.labels[cost-center]
-            connectionDetails:
-              - fromFieldPath: status.atProvider.repositoryUrl
-                name: artifact-registry-url
-                type: FromFieldPath
+    - step: auto-ready
+      functionRef:
+        name: function-auto-ready

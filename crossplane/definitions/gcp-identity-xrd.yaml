@@ -1,0 +1,48 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: gcpidentities.platform.openco.tech
+spec:
+  group: platform.openco.tech
+  names:
+    kind: GCPIdentity
+    plural: gcpidentities
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                appName:
+                  type: string
+                projectId:
+                  type: string
+                teamId:
+                  type: string
+                environment:
+                  type: string
+                roles:
+                  type: array
+                  items:
+                    type: string
+                  default:
+                    - "roles/run.invoker"
+                    - "roles/artifactregistry.reader"
+                    - "roles/secretmanager.secretAccessor"
+              required:
+                - appName
+                - projectId
+            status:
+              type: object
+              properties:
+                serviceAccountEmail:
+                  type: string
+                serviceAccountId:
+                  type: string
+                ready:
+                  type: boolean

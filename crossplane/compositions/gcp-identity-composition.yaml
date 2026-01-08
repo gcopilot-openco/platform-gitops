@@ -1,0 +1,82 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: gcpidentity.platform.openco.tech
+spec:
+  compositeTypeRef:
+    apiVersion: platform.openco.tech/v1alpha1
+    kind: GCPIdentity
+  mode: Pipeline
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: service-account
+            base:
+              apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+              kind: ServiceAccount
+              spec:
+                forProvider:
+                  displayName: Service account for app
+            patches:
+              - fromFieldPath: spec.appName
+                toFieldPath: metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      type: Format
+                      fmt: 'sa-%s'
+              - fromFieldPath: spec.projectId
+                toFieldPath: spec.forProvider.project
+              - fromFieldPath: spec.appName
+                toFieldPath: spec.forProvider.displayName
+                transforms:
+                  - type: string
+                    string:
+                      type: Format
+                      fmt: 'Service account for %s'
+              - fromFieldPath: spec.teamId
+                toFieldPath: metadata.labels[team]
+              - fromFieldPath: spec.environment
+                toFieldPath: metadata.labels[env]
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.atProvider.email
+                toFieldPath: status.serviceAccountEmail
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.atProvider.uniqueId
+                toFieldPath: status.serviceAccountId
+
+          - name: iam-binding
+            base:
+              apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+              kind: ProjectIAMMember
+              spec:
+                forProvider:
+                  role: roles/run.invoker
+            patches:
+              - type: CombineFromComposite
+                combine:
+                  variables:
+                    - fromFieldPath: spec.appName
+                  strategy: string
+                  string:
+                    fmt: 'sa-run-invoker-%s'
+                toFieldPath: metadata.name
+              - fromFieldPath: spec.projectId
+                toFieldPath: spec.forProvider.project
+              - type: CombineFromComposite
+                combine:
+                  variables:
+                    - fromFieldPath: status.serviceAccountEmail
+                  strategy: string
+                  string:
+                    fmt: 'serviceAccount:%s'
+                toFieldPath: spec.forProvider.member
+
+    - step: auto-ready
+      functionRef:
+        name: function-auto-ready

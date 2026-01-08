@@ -1,0 +1,115 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: appenvironment.platform.openco.tech
+spec:
+  compositeTypeRef:
+    apiVersion: platform.openco.tech/v1alpha1
+    kind: AppEnvironment
+  mode: Pipeline
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          # 1. Create GCPProject XR
+          - name: gcp-project-xr
+            base:
+              apiVersion: platform.openco.tech/v1alpha1
+              kind: GCPProject
+            patches:
+              - fromFieldPath: spec.appName
+                toFieldPath: spec.appName
+              - fromFieldPath: spec.environment
+                toFieldPath: spec.environment
+              - fromFieldPath: spec.teamId
+                toFieldPath: spec.teamId
+              - fromFieldPath: spec.costCenter
+                toFieldPath: spec.costCenter
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.projectId
+                toFieldPath: status.projectId
+
+          # 2. Create GCPIdentity XR
+          - name: gcp-identity-xr
+            base:
+              apiVersion: platform.openco.tech/v1alpha1
+              kind: GCPIdentity
+            patches:
+              - fromFieldPath: spec.appName
+                toFieldPath: spec.appName
+              - fromFieldPath: spec.teamId
+                toFieldPath: spec.teamId
+              - fromFieldPath: spec.environment
+                toFieldPath: spec.environment
+              - fromFieldPath: status.projectId
+                toFieldPath: spec.projectId
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.serviceAccountEmail
+                toFieldPath: status.serviceAccountEmail
+
+          # 3. Create GCPArtifact XR
+          - name: gcp-artifact-xr
+            base:
+              apiVersion: platform.openco.tech/v1alpha1
+              kind: GCPArtifact
+            patches:
+              - fromFieldPath: spec.appName
+                toFieldPath: spec.appName
+              - fromFieldPath: spec.region
+                toFieldPath: spec.region
+              - fromFieldPath: spec.teamId
+                toFieldPath: spec.teamId
+              - fromFieldPath: spec.environment
+                toFieldPath: spec.environment
+              - fromFieldPath: spec.costCenter
+                toFieldPath: spec.costCenter
+              - fromFieldPath: status.projectId
+                toFieldPath: spec.projectId
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.repositoryUrl
+                toFieldPath: status.artifactRegistryUrl
+
+          # 4. Create GCPSecretManager XR
+          - name: gcp-secretmanager-xr
+            base:
+              apiVersion: platform.openco.tech/v1alpha1
+              kind: GCPSecretManager
+            patches:
+              - fromFieldPath: spec.appName
+                toFieldPath: spec.appName
+              - fromFieldPath: status.projectId
+                toFieldPath: spec.projectId
+              - fromFieldPath: spec.secretManager.secrets
+                toFieldPath: spec.secrets
+
+          # 5. Create GCPCloudRun XR
+          - name: gcp-cloudrun-xr
+            base:
+              apiVersion: platform.openco.tech/v1alpha1
+              kind: GCPCloudRun
+            patches:
+              - fromFieldPath: spec.appName
+                toFieldPath: spec.appName
+              - fromFieldPath: spec.region
+                toFieldPath: spec.region
+              - fromFieldPath: spec.teamId
+                toFieldPath: spec.teamId
+              - fromFieldPath: spec.environment
+                toFieldPath: spec.environment
+              - fromFieldPath: status.projectId
+                toFieldPath: spec.projectId
+              - fromFieldPath: status.serviceAccountEmail
+                toFieldPath: spec.serviceAccountEmail
+              - fromFieldPath: spec.cloudRun.port
+                toFieldPath: spec.port
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.serviceUrl
+                toFieldPath: status.cloudRunUrl
+
+    - step: auto-ready
+      functionRef:
+        name: function-auto-ready

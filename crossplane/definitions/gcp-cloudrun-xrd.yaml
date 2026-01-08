@@ -1,0 +1,67 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: gcpcloudruns.platform.openco.tech
+spec:
+  group: platform.openco.tech
+  names:
+    kind: GCPCloudRun
+    plural: gcpcloudruns
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                appName:
+                  type: string
+                projectId:
+                  type: string
+                region:
+                  type: string
+                  default: "us-east4"
+                serviceAccountEmail:
+                  type: string
+                image:
+                  type: string
+                  default: "us-docker.pkg.dev/cloudrun/container/hello"
+                port:
+                  type: integer
+                  default: 8080
+                cpu:
+                  type: string
+                  default: "1000m"
+                memory:
+                  type: string
+                  default: "512Mi"
+                minInstances:
+                  type: integer
+                  default: 0
+                maxInstances:
+                  type: integer
+                  default: 10
+                invokers:
+                  type: array
+                  items:
+                    type: string
+                  default:
+                    - "allUsers"
+                teamId:
+                  type: string
+                environment:
+                  type: string
+              required:
+                - appName
+                - projectId
+            status:
+              type: object
+              properties:
+                serviceUrl:
+                  type: string
+                ready:
+                  type: boolean

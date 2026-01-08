@@ -16,7 +16,7 @@ Manage BACK stack (Backstage, ArgoCD, Crossplane, Kubernetes) infrastructure def
 - `crossplane/providers/` - GCP provider packages and configuration
 - `crossplane/definitions/` - CompositeResourceDefinitions (XRDs)
 - `crossplane/compositions/` - Composition templates that bundle resources
-- `crossplane/claims/` - Tenant environment claims (instances of resources)
+- `crossplane/apps/` - App environment manifests (instances of services)
 
 ### Policy Enforcement
 - `kyverno/policies/` - Kubernetes admission policies for governance
@@ -32,16 +32,18 @@ Manage BACK stack (Backstage, ArgoCD, Crossplane, Kubernetes) infrastructure def
 
 ### Deploy New Service Infrastructure
 
-1. Create claim file: `crossplane/claims/{service-name}-{environment}.yaml`
-2. Base on: `crossplane/claims/examples/demo-service-hml.yaml`
+1. Create app file: `crossplane/apps/{service-name}-{environment}.yaml`
+2. Base on: `crossplane/apps/examples/demo-service-sandbox.yaml`
 3. Update fields:
    - `metadata.name`
    - `spec.appName`
-   - `spec.environment`
+   - `spec.environment` (hml, prod, or sandbox)
    - `spec.teamId`
    - `spec.costCenter`
+   - `spec.cloudRun` (optional)
+   - `spec.secretManager` (optional)
 4. Create PR → Merge → ArgoCD syncs automatically
-5. Verify: `kubectl get tenantenvironmentclaim {service-name}-{env}`
+5. Verify: `kubectl get appclaim {service-name}-{env}`
 
 ### Monitor Deployments
 
@@ -49,8 +51,8 @@ Manage BACK stack (Backstage, ArgoCD, Crossplane, Kubernetes) infrastructure def
 # Check ArgoCD applications
 kubectl get applications -n argocd
 
-# Watch claim provisioning
-kubectl get tenantenvironmentclaim -w
+# Watch app provisioning
+kubectl get appclaim -w
 
 # View cluster events
 kubectl get events -A --sort-by='.lastTimestamp'
@@ -74,15 +76,15 @@ kubectl get events -A --sort-by='.lastTimestamp'
 - Kyverno v3.3.0
 - Basic policies
 
-### ✅ Phase 2: Service Composition (In Progress)
-- TenantEnvironment XRD
-- Composition (bundles 4 resources)
+### ✅ Phase 2: Service Composition (Complete)
+- Nested AppEnvironment XRD architecture
+- Modular Compositions (Project, Identity, Artifact, Cloud Run, Secrets)
 - Enhanced Kyverno policies
-- 3 ArgoCD applications
+- Automated readiness via function-auto-ready
 
 ### 🔮 Phase 3: Backstage Integration (Planned)
 - Template-based service creation
-- Automated claim generation
+- Automated manifest generation
 - Status feedback loop
 
 ## 📚 Documentation
@@ -90,7 +92,7 @@ kubectl get events -A --sort-by='.lastTimestamp'
 - **Getting Started**: See `docs/DEVELOPER_GUIDE.md`
 - **Architecture**: See `docs/ARCHITECTURE.md`
 - **Phase 2 Verification**: See `docs/PHASE2_DEPLOYMENT.md`
-- **Provisioning Claims**: See `crossplane/claims/README.md`
+- **Provisioning Apps**: See `crossplane/apps/README.md`
 
 ## 🛠️ Maintenance
 
@@ -127,7 +129,7 @@ git push origin main
 ## ⚠️ Important Notes
 
 - **Never use `kubectl apply` directly** - Use git commits instead
-- **Always test in `hml` environment first** - Before pushing to `prod`
+- **Always test in `hml` or `sandbox` environment first** - Before pushing to `prod`
 - **Review ArgoCD status** - Before and after changes
 - **Check Kyverno policies** - They may modify or reject resources
 

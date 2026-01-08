@@ -1,0 +1,49 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: gcpprojects.platform.openco.tech
+spec:
+  group: platform.openco.tech
+  names:
+    kind: GCPProject
+    plural: gcpprojects
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                appName:
+                  type: string
+                environment:
+                  type: string
+                  enum: [hml, prod, sandbox]
+                teamId:
+                  type: string
+                costCenter:
+                  type: string
+                billingAccount:
+                  type: string
+                  default: "0182B4-2FC191-0FCF10"
+                orgId:
+                  type: string
+                  default: "875387917387"
+              required:
+                - appName
+                - environment
+                - teamId
+                - costCenter
+            status:
+              type: object
+              properties:
+                projectId:
+                  type: string
+                projectNumber:
+                  type: string
+                ready:
+                  type: boolean
