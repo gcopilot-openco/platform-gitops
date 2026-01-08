@@ -8,8 +8,10 @@ spec:
     kind: TenantEnvironment
     plural: tenantenvironments
   scope: Namespaced
+  defaultCompositeDeletePolicy: Background
   defaultCompositionRef:
     name: tenantenvironment.platform.openco.tech
+  defaultCompositionUpdatePolicy: Automatic
   versions:
     - name: v1alpha1
       served: true
