@@ -2,7 +2,7 @@ apiVersion: platform.openco.tech/v1alpha1
 kind: AppComposite
 metadata:
   name: demo-service-sandbox
-  namespace: crossplane-system
+  namespace: origination
 spec:
   appName: demo-service
   environment: sandbox

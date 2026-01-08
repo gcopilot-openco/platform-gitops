@@ -12,7 +12,7 @@ spec:
         resources:
           kinds:
             - platform.openco.tech/v1alpha1/AppEnvironment
-            - platform.openco.tech/v1alpha1/AppClaim
+            - platform.openco.tech/v1alpha1/AppComposite
           operations:
             - UPDATE
             - DELETE
@@ -38,7 +38,7 @@ spec:
         resources:
           kinds:
             - platform.openco.tech/v1alpha1/AppEnvironment
-            - platform.openco.tech/v1alpha1/AppClaim
+            - platform.openco.tech/v1alpha1/AppComposite
           operations:
             - CREATE
       validate:

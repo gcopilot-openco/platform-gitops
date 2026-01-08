@@ -7,7 +7,7 @@ spec:
   names:
     kind: AppEnvironment
     plural: appenvironments
-  compositeNames:
+  claimNames:
     kind: AppComposite
     plural: appcomposites
   scope: Namespaced

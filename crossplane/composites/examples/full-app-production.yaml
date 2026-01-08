@@ -2,7 +2,7 @@ apiVersion: platform.openco.tech/v1alpha1
 kind: AppComposite
 metadata:
   name: payment-service-prod
-  namespace: finance-apps
+  namespace: finance
   labels:
     team: finance
     cost-center: CC-FIN-001

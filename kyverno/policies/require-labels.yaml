@@ -11,7 +11,7 @@ spec:
         resources:
           kinds:
             - platform.openco.tech/v1alpha1/AppEnvironment
-            - platform.openco.tech/v1alpha1/AppClaim
+            - platform.openco.tech/v1alpha1/AppComposite
       validate:
         message: "Label 'team' is required and must have a valid value"
         pattern:
@@ -24,7 +24,7 @@ spec:
         resources:
           kinds:
             - platform.openco.tech/v1alpha1/AppEnvironment
-            - platform.openco.tech/v1alpha1/AppClaim
+            - platform.openco.tech/v1alpha1/AppComposite
       validate:
         message: "Label 'cost-center' is required and must have a valid value"
         pattern:
@@ -37,7 +37,7 @@ spec:
         resources:
           kinds:
             - platform.openco.tech/v1alpha1/AppEnvironment
-            - platform.openco.tech/v1alpha1/AppClaim
+            - platform.openco.tech/v1alpha1/AppComposite
       validate:
         message: "Label 'env' is required for environment tracking"
         pattern:
