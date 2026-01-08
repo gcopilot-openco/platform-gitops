@@ -27,6 +27,7 @@ spec:
                 forProvider:
                   autoCreateNetwork: false
                   billingAccount: '0182B4-2FC191-0FCF10'
+                  orgId: '875387917387'
             patches:
               # Kubernetes resource name: prj-{environment}-{appName}
               - type: CombineFromComposite
