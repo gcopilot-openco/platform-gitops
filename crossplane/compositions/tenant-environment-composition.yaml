@@ -6,7 +6,6 @@ spec:
   compositeTypeRef:
     apiVersion: platform.openco.tech/v1alpha1
     kind: TenantEnvironment
-  mode: Pipeline
   resources:
     # GCP Project
     - name: gcp-project
