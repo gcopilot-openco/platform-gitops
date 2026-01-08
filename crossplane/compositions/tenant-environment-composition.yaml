@@ -28,32 +28,32 @@ spec:
                   autoCreateNetwork: false
                   billingAccount: '0182B4-2FC191-0FCF10'
             patches:
-              # Kubernetes resource name: prj-{appName}-{environment}
+              # Kubernetes resource name: prj-{environment}-{appName}
               - type: CombineFromComposite
                 combine:
                   variables:
-                    - fromFieldPath: spec.appName
                     - fromFieldPath: spec.environment
+                    - fromFieldPath: spec.appName
                   strategy: string
                   string:
                     fmt: 'prj-%s-%s'
                 toFieldPath: metadata.name
-              # GCP display name: prj-{appName}-{environment}
+              # GCP display name: prj-{environment}-{appName}
               - type: CombineFromComposite
                 combine:
                   variables:
-                    - fromFieldPath: spec.appName
                     - fromFieldPath: spec.environment
+                    - fromFieldPath: spec.appName
                   strategy: string
                   string:
                     fmt: 'prj-%s-%s'
                 toFieldPath: spec.forProvider.name
-              # GCP project ID: prj-{appName}-{environment}
+              # GCP project ID: prj-{environment}-{appName}
               - type: CombineFromComposite
                 combine:
                   variables:
-                    - fromFieldPath: spec.appName
                     - fromFieldPath: spec.environment
+                    - fromFieldPath: spec.appName
                   strategy: string
                   string:
                     fmt: 'prj-%s-%s'
@@ -100,8 +100,8 @@ spec:
               - type: CombineFromComposite
                 combine:
                   variables:
-                    - fromFieldPath: spec.appName
                     - fromFieldPath: spec.environment
+                    - fromFieldPath: spec.appName
                   strategy: string
                   string:
                     fmt: 'prj-%s-%s'
@@ -129,8 +129,8 @@ spec:
               - type: CombineFromComposite
                 combine:
                   variables:
-                    - fromFieldPath: spec.appName
                     - fromFieldPath: spec.environment
+                    - fromFieldPath: spec.appName
                   strategy: string
                   string:
                     fmt: 'prj-%s-%s'
@@ -158,8 +158,8 @@ spec:
               - type: CombineFromComposite
                 combine:
                   variables:
-                    - fromFieldPath: spec.appName
                     - fromFieldPath: spec.environment
+                    - fromFieldPath: spec.appName
                   strategy: string
                   string:
                     fmt: 'prj-%s-%s'
@@ -187,8 +187,8 @@ spec:
               - type: CombineFromComposite
                 combine:
                   variables:
-                    - fromFieldPath: spec.appName
                     - fromFieldPath: spec.environment
+                    - fromFieldPath: spec.appName
                   strategy: string
                   string:
                     fmt: 'prj-%s-%s'
@@ -217,8 +217,8 @@ spec:
               - type: CombineFromComposite
                 combine:
                   variables:
-                    - fromFieldPath: spec.appName
                     - fromFieldPath: spec.environment
+                    - fromFieldPath: spec.appName
                   strategy: string
                   string:
                     fmt: 'prj-%s-%s'
@@ -263,8 +263,8 @@ spec:
               - type: CombineFromComposite
                 combine:
                   variables:
-                    - fromFieldPath: spec.appName
                     - fromFieldPath: spec.environment
+                    - fromFieldPath: spec.appName
                   strategy: string
                   string:
                     fmt: 'prj-%s-%s'
