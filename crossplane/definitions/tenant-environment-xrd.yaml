@@ -8,10 +8,29 @@ spec:
     kind: TenantEnvironment
     plural: tenantenvironments
   scope: Namespaced
+  defaultCompositionRef:
+    name: tenantenvironment.platform.openco.tech
   versions:
     - name: v1alpha1
       served: true
       referenceable: true
+      additionalPrinterColumns:
+        - name: SYNCED
+          type: string
+          jsonPath: .status.conditions[?(@.type=='Synced')].status
+        - name: READY
+          type: string
+          jsonPath: .status.conditions[?(@.type=='Ready')].status
+        - name: COMPOSITION
+          type: string
+          jsonPath: .spec.crossplane.compositionRef.name
+        - name: COMPOSITIONREVISION
+          type: string
+          priority: 1
+          jsonPath: .spec.crossplane.compositionRevisionRef.name
+        - name: AGE
+          type: date
+          jsonPath: .metadata.creationTimestamp
       schema:
         openAPIV3Schema:
           description: A TenantEnvironment provides a complete GCP environment for a service
