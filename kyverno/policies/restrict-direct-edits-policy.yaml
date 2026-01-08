@@ -12,7 +12,6 @@ spec:
         resources:
           kinds:
             - platform.openco.tech/v1alpha1/TenantEnvironment
-            - platform.openco.tech/v1alpha1/TenantEnvironmentClaim
           operations:
             - UPDATE
             - DELETE
@@ -38,7 +37,6 @@ spec:
         resources:
           kinds:
             - platform.openco.tech/v1alpha1/TenantEnvironment
-            - platform.openco.tech/v1alpha1/TenantEnvironmentClaim
           operations:
             - CREATE
       validate:

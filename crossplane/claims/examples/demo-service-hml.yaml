@@ -1,8 +1,7 @@
 apiVersion: platform.openco.tech/v1alpha1
-kind: TenantEnvironmentClaim
+kind: TenantEnvironment
 metadata:
   name: demo-service-hml
-  namespace: default
 spec:
   appName: demo-service
   environment: hml

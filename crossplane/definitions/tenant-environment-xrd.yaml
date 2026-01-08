@@ -1,4 +1,4 @@
-apiVersion: apiextensions.crossplane.io/v1
+apiVersion: apiextensions.crossplane.io/v2
 kind: CompositeResourceDefinition
 metadata:
   name: tenantenvironments.platform.openco.tech
@@ -7,13 +7,7 @@ spec:
   names:
     kind: TenantEnvironment
     plural: tenantenvironments
-  claimNames:
-    kind: TenantEnvironmentClaim
-    plural: tenantenvironmentclaims
-  connectionSecretKeys:
-    - gcp-project-id
-    - gcp-service-account-email
-    - artifact-registry-url
+  scope: Namespaced
   versions:
     - name: v1alpha1
       served: true
