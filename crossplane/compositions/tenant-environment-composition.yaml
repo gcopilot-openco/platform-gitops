@@ -35,12 +35,14 @@ spec:
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'prj-%s'
                 - fromFieldPath: spec.appName
                   toFieldPath: spec.forProvider.name
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'prj-%s'
                 - fromFieldPath: spec.environment
                   toFieldPath: metadata.labels[env]
@@ -85,12 +87,14 @@ spec:
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'compute-api-%s'
                 - fromFieldPath: metadata.name
                   toFieldPath: spec.forProvider.project
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'prj-%s'
 
             - name: run-api
@@ -112,12 +116,14 @@ spec:
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'run-api-%s'
                 - fromFieldPath: metadata.name
                   toFieldPath: spec.forProvider.project
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'prj-%s'
 
             - name: artifactregistry-api
@@ -139,12 +145,14 @@ spec:
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'artifactregistry-api-%s'
                 - fromFieldPath: metadata.name
                   toFieldPath: spec.forProvider.project
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'prj-%s'
 
             - name: iam-api
@@ -166,12 +174,14 @@ spec:
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'iam-api-%s'
                 - fromFieldPath: metadata.name
                   toFieldPath: spec.forProvider.project
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'prj-%s'
 
             # Service Account
@@ -194,18 +204,21 @@ spec:
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'sa-%s'
                 - fromFieldPath: metadata.name
                   toFieldPath: spec.forProvider.project
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'prj-%s'
                 - fromFieldPath: spec.appName
                   toFieldPath: spec.forProvider.displayName
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'Service account for %s'
                 - fromFieldPath: spec.teamId
                   toFieldPath: metadata.labels[team]
@@ -237,18 +250,21 @@ spec:
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'repo-%s'
                 - fromFieldPath: metadata.name
                   toFieldPath: spec.forProvider.project
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'prj-%s'
                 - fromFieldPath: spec.appName
                   toFieldPath: spec.forProvider.repositoryId
                   transforms:
                     - type: string
                       string:
+                        type: Format
                         fmt: 'repo-%s'
                 - fromFieldPath: spec.teamId
                   toFieldPath: metadata.labels[team]
