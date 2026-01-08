@@ -11,7 +11,8 @@ spec:
       match:
         resources:
           kinds:
-            - platform.openco.tech/v1alpha1/TenantEnvironment
+            - platform.openco.tech/v1alpha1/AppEnvironment
+            - platform.openco.tech/v1alpha1/AppClaim
           annotations:
             backstage.io/managed-by: 'scaffolder'
       mutate:
@@ -25,7 +26,8 @@ spec:
       match:
         resources:
           kinds:
-            - platform.openco.tech/v1alpha1/TenantEnvironment
+            - platform.openco.tech/v1alpha1/AppEnvironment
+            - platform.openco.tech/v1alpha1/AppClaim
       mutate:
         patchStrategicMerge:
           metadata:
