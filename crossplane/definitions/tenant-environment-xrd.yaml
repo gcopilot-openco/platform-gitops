@@ -12,6 +12,9 @@ spec:
   defaultCompositionRef:
     name: tenantenvironment.platform.openco.tech
   defaultCompositionUpdatePolicy: Automatic
+  compositionRevisionSelector:
+    matchLabels:
+      crossplane.io/composition-name: tenantenvironment.platform.openco.tech
   versions:
     - name: v1alpha1
       served: true
