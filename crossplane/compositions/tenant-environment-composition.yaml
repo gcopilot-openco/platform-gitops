@@ -58,10 +58,6 @@ spec:
                   toFieldPath: metadata.ownerReferences[0].name
                 - fromFieldPath: metadata.creationTimestamp
                   toFieldPath: metadata.ownerReferences[0].blockOwnerDeletion
-                  transforms:
-                    - type: convert
-                      convert:
-                        toType: bool
               connectionDetails:
                 - fromFieldPath: status.atProvider.projectNumber
                   name: gcp-project-id
