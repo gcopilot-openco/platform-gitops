@@ -26,7 +26,7 @@ spec:
               spec:
                 forProvider:
                   autoCreateNetwork: false
-                  billingAccount: '$(BILLING_ACCOUNT_ID)'
+                  billingAccount: 'billingAccounts/0182B4-2FC191-0FCF10'
             patches:
               # Kubernetes resource name: prj-{appName}-{environment}
               - type: CombineFromComposite
