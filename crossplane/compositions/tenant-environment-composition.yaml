@@ -28,7 +28,7 @@ spec:
                     autoCreateNetwork: false
                     billingAccount: '$(BILLING_ACCOUNT_ID)'
                   providerConfigRef:
-                    name: gcp-provider
+                    name: default
               patches:
                 - fromFieldPath: spec.appName
                   toFieldPath: metadata.name
@@ -76,7 +76,7 @@ spec:
                     service: compute.googleapis.com
                     disableOnDestroy: false
                   providerConfigRef:
-                    name: gcp-provider
+                    name: default
               patches:
                 - fromFieldPath: spec.appName
                   toFieldPath: metadata.name
@@ -105,7 +105,7 @@ spec:
                     service: run.googleapis.com
                     disableOnDestroy: false
                   providerConfigRef:
-                    name: gcp-provider
+                    name: default
               patches:
                 - fromFieldPath: spec.appName
                   toFieldPath: metadata.name
@@ -134,7 +134,7 @@ spec:
                     service: artifactregistry.googleapis.com
                     disableOnDestroy: false
                   providerConfigRef:
-                    name: gcp-provider
+                    name: default
               patches:
                 - fromFieldPath: spec.appName
                   toFieldPath: metadata.name
@@ -163,7 +163,7 @@ spec:
                     service: iam.googleapis.com
                     disableOnDestroy: false
                   providerConfigRef:
-                    name: gcp-provider
+                    name: default
               patches:
                 - fromFieldPath: spec.appName
                   toFieldPath: metadata.name
@@ -193,7 +193,7 @@ spec:
                     displayName: Service account for tenant
                     description: Runtime identity for the tenant service
                   providerConfigRef:
-                    name: gcp-provider
+                    name: default
               patches:
                 - fromFieldPath: spec.appName
                   toFieldPath: metadata.name
@@ -239,7 +239,7 @@ spec:
                     location: us-central1
                     description: Container image repository for the tenant service
                   providerConfigRef:
-                    name: gcp-provider
+                    name: default
               patches:
                 - fromFieldPath: spec.appName
                   toFieldPath: metadata.name
