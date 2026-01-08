@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: crossplane-providers
+  name: kyverno-policies
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "2"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -12,10 +12,10 @@ spec:
   source:
     repoURL: https://github.com/gcopilot-openco/platform-gitops.git
     targetRevision: main
-    path: crossplane/providers
+    path: kyverno/policies
   destination:
     server: https://kubernetes.default.svc
-    namespace: crossplane-system
+    namespace: kyverno
   syncPolicy:
     automated:
       prune: true

@@ -16,7 +16,7 @@ Manage BACK stack (Backstage, ArgoCD, Crossplane, Kubernetes) infrastructure def
 - `crossplane/providers/` - GCP provider packages and configuration
 - `crossplane/definitions/` - CompositeResourceDefinitions (XRDs)
 - `crossplane/compositions/` - Composition templates that bundle resources
-- `crossplane/apps/` - App environment manifests (instances of services)
+- `crossplane/composites/` - App environment manifests (instances of services)
 
 ### Policy Enforcement
 - `kyverno/policies/` - Kubernetes admission policies for governance
@@ -32,8 +32,8 @@ Manage BACK stack (Backstage, ArgoCD, Crossplane, Kubernetes) infrastructure def
 
 ### Deploy New Service Infrastructure
 
-1. Create app file: `crossplane/apps/{service-name}-{environment}.yaml`
-2. Base on: `crossplane/apps/examples/demo-service-sandbox.yaml`
+1. Create app file: `crossplane/composites/{service-name}-{environment}.yaml`
+2. Base on: `crossplane/composites/examples/full-app-production.yaml`
 3. Update fields:
    - `metadata.name`
    - `spec.appName`
@@ -43,7 +43,7 @@ Manage BACK stack (Backstage, ArgoCD, Crossplane, Kubernetes) infrastructure def
    - `spec.cloudRun` (optional)
    - `spec.secretManager` (optional)
 4. Create PR → Merge → ArgoCD syncs automatically
-5. Verify: `kubectl get appclaim {service-name}-{env}`
+5. Verify: `kubectl get appcomposite {service-name}-{env}`
 
 ### Monitor Deployments
 
@@ -52,7 +52,7 @@ Manage BACK stack (Backstage, ArgoCD, Crossplane, Kubernetes) infrastructure def
 kubectl get applications -n argocd
 
 # Watch app provisioning
-kubectl get appclaim -w
+kubectl get appcomposite -w
 
 # View cluster events
 kubectl get events -A --sort-by='.lastTimestamp'
@@ -92,7 +92,7 @@ kubectl get events -A --sort-by='.lastTimestamp'
 - **Getting Started**: See `docs/DEVELOPER_GUIDE.md`
 - **Architecture**: See `docs/ARCHITECTURE.md`
 - **Phase 2 Verification**: See `docs/PHASE2_DEPLOYMENT.md`
-- **Provisioning Apps**: See `crossplane/apps/README.md`
+- **Provisioning Apps**: See `crossplane/composites/README.md`
 
 ## 🛠️ Maintenance
 

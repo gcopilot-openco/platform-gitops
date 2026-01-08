@@ -1,6 +1,6 @@
 # App Environment Resources
 
-This directory contains `AppClaim` resources for all services provisioned through the platform.
+This directory contains `AppComposite` resources for all services provisioned through the platform.
 
 ## Naming Convention
 
@@ -10,6 +10,7 @@ This directory contains `AppClaim` resources for all services provisioned throug
 - `payment-service-hml.yaml` - Payment service in homologation
 - `auth-service-prod.yaml` - Auth service in production
 - `data-pipeline-sandbox.yaml` - Experimental environment
+- `full-app-production.yaml` - Comprehensive production example with Cloud Run and Secrets
 
 ## Structure
 
@@ -29,7 +30,7 @@ The platform uses a **Nested Composite Resource** architecture. A single `AppEnv
 1. Use the "Microservice (Crossplane)" template in Backstage.
 2. Fill the form with service details.
 3. Backstage generates the app manifest.
-4. Create PR to `platform-gitops` adding the file to `crossplane/apps/`.
+4. Create PR to `platform-gitops` adding the file to `crossplane/composites/`.
 
 ### Option 2: Manual
 1. Copy `examples/demo-service-sandbox.yaml`.
@@ -53,8 +54,8 @@ The platform uses a **Nested Composite Resource** architecture. A single `AppEnv
 After merging PR, verify provisioning:
 
 ```bash
-# Get Claim status
-kubectl get appclaim {service-name}-{env} -w
+# Get Composite status
+kubectl get appcomposite {service-name}-{env} -w
 
 # Check orchestrated XRs
 kubectl get gcpproject,gcpidentity,gcpartifact,gcpcloudrun -l crossplane.io/composite={composite-id}
@@ -66,10 +67,10 @@ gcloud artifacts repositories list --location=us-east4 --filter="repositoryId:re
 
 ## Troubleshooting
 
-### Claim Stuck in Progress
+### Composite Stuck in Progress
 Check if the top-level Composite (XR) is healthy:
 ```bash
-kubectl describe appclaim {service-name}-{env}
+kubectl describe appcomposite {service-name}-{env}
 ```
 
 Check the child XRs for specific domain errors:

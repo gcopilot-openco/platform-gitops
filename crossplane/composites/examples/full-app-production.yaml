@@ -1,0 +1,33 @@
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppComposite
+metadata:
+  name: payment-service-prod
+  namespace: finance-apps
+  labels:
+    team: finance
+    cost-center: CC-FIN-001
+    env: prod
+spec:
+  # Base Identifiers
+  appName: payment-service
+  environment: prod
+  teamId: finance
+  costCenter: CC-FIN-001
+  
+  # Regional Configuration
+  region: us-east4
+  
+  # Cloud Run Configuration
+  cloudRun:
+    enabled: true
+    port: 3000
+    public: false
+    
+  # Secret Manager Configuration
+  # This creates the secret shells in GCP Secret Manager
+  secretManager:
+    enabled: true
+    secrets:
+      - name: STRIPE_API_KEY
+      - name: DB_CONNECTION_URL
+      - name: REDIS_PASSWORD
