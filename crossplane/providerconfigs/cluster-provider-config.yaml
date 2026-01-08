@@ -1,0 +1,12 @@
+apiVersion: gcp.m.upbound.io/v1beta1
+kind: ClusterProviderConfig
+metadata:
+  name: default
+spec:
+  credentials:
+    secretRef:
+      key: credentials
+      name: gcp-credentials
+      namespace: crossplane-system
+    source: Secret
+  projectID: prj-prod-platform-admin
