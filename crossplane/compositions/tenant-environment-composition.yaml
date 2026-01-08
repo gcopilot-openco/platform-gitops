@@ -6,250 +6,258 @@ spec:
   compositeTypeRef:
     apiVersion: platform.openco.tech/v1alpha1
     kind: TenantEnvironment
-  resources:
-    # GCP Project
-    - name: gcp-project
-      base:
-        apiVersion: cloudplatform.gcp.crossplane.io/v1beta1
-        kind: Project
-        metadata:
-          labels:
-            component: gcp-project
-        spec:
-          forProvider:
-            autoCreateNetwork: false
-            billingAccount: '$(BILLING_ACCOUNT_ID)'
-          providerConfigRef:
-            name: gcp-provider
-      patches:
-        - fromFieldPath: spec.appName
-          toFieldPath: metadata.name
-          transforms:
-            - type: string
-              string:
-                fmt: 'prj-%s'
-        - fromFieldPath: spec.appName
-          toFieldPath: spec.forProvider.name
-          transforms:
-            - type: string
-              string:
-                fmt: 'prj-%s'
-        - fromFieldPath: spec.environment
-          toFieldPath: metadata.labels[env]
-        - fromFieldPath: spec.teamId
-          toFieldPath: metadata.labels[team]
-        - fromFieldPath: spec.costCenter
-          toFieldPath: metadata.labels[cost-center]
-        - fromFieldPath: spec.appName
-          toFieldPath: metadata.labels[app]
-        - fromFieldPath: metadata.uid
-          toFieldPath: metadata.ownerReferences[0].uid
-        - fromFieldPath: metadata.name
-          toFieldPath: metadata.ownerReferences[0].name
-        - fromFieldPath: metadata.creationTimestamp
-          toFieldPath: metadata.ownerReferences[0].blockOwnerDeletion
-          transforms:
-            - type: convert
-              convert:
-                toType: bool
-                fromType: string
-      connectionDetails:
-        - fromFieldPath: status.atProvider.projectNumber
-          name: gcp-project-id
-          type: FromFieldPath
+  mode: Pipeline
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+            # GCP Project
+            - name: gcp-project
+              base:
+                apiVersion: cloudplatform.gcp.crossplane.io/v1beta1
+                kind: Project
+                metadata:
+                  labels:
+                    component: gcp-project
+                spec:
+                  forProvider:
+                    autoCreateNetwork: false
+                    billingAccount: '$(BILLING_ACCOUNT_ID)'
+                  providerConfigRef:
+                    name: gcp-provider
+              patches:
+                - fromFieldPath: spec.appName
+                  toFieldPath: metadata.name
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'prj-%s'
+                - fromFieldPath: spec.appName
+                  toFieldPath: spec.forProvider.name
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'prj-%s'
+                - fromFieldPath: spec.environment
+                  toFieldPath: metadata.labels[env]
+                - fromFieldPath: spec.teamId
+                  toFieldPath: metadata.labels[team]
+                - fromFieldPath: spec.costCenter
+                  toFieldPath: metadata.labels[cost-center]
+                - fromFieldPath: spec.appName
+                  toFieldPath: metadata.labels[app]
+                - fromFieldPath: metadata.uid
+                  toFieldPath: metadata.ownerReferences[0].uid
+                - fromFieldPath: metadata.name
+                  toFieldPath: metadata.ownerReferences[0].name
+                - fromFieldPath: metadata.creationTimestamp
+                  toFieldPath: metadata.ownerReferences[0].blockOwnerDeletion
+                  transforms:
+                    - type: convert
+                      convert:
+                        toType: bool
+                        fromType: string
+              connectionDetails:
+                - fromFieldPath: status.atProvider.projectNumber
+                  name: gcp-project-id
+                  type: FromFieldPath
 
-    # Enable Required APIs
-    - name: compute-api
-      base:
-        apiVersion: cloudplatform.gcp.crossplane.io/v1beta1
-        kind: ProjectService
-        metadata:
-          labels:
-            component: api-service
-        spec:
-          forProvider:
-            service: compute.googleapis.com
-            disableOnDestroy: false
-          providerConfigRef:
-            name: gcp-provider
-      patches:
-        - fromFieldPath: spec.appName
-          toFieldPath: metadata.name
-          transforms:
-            - type: string
-              string:
-                fmt: 'compute-api-%s'
-        - fromFieldPath: metadata.name
-          toFieldPath: spec.forProvider.project
-          transforms:
-            - type: string
-              string:
-                fmt: 'prj-%s'
+            # Enable Required APIs
+            - name: compute-api
+              base:
+                apiVersion: cloudplatform.gcp.crossplane.io/v1beta1
+                kind: ProjectService
+                metadata:
+                  labels:
+                    component: api-service
+                spec:
+                  forProvider:
+                    service: compute.googleapis.com
+                    disableOnDestroy: false
+                  providerConfigRef:
+                    name: gcp-provider
+              patches:
+                - fromFieldPath: spec.appName
+                  toFieldPath: metadata.name
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'compute-api-%s'
+                - fromFieldPath: metadata.name
+                  toFieldPath: spec.forProvider.project
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'prj-%s'
 
-    - name: run-api
-      base:
-        apiVersion: cloudplatform.gcp.crossplane.io/v1beta1
-        kind: ProjectService
-        metadata:
-          labels:
-            component: api-service
-        spec:
-          forProvider:
-            service: run.googleapis.com
-            disableOnDestroy: false
-          providerConfigRef:
-            name: gcp-provider
-      patches:
-        - fromFieldPath: spec.appName
-          toFieldPath: metadata.name
-          transforms:
-            - type: string
-              string:
-                fmt: 'run-api-%s'
-        - fromFieldPath: metadata.name
-          toFieldPath: spec.forProvider.project
-          transforms:
-            - type: string
-              string:
-                fmt: 'prj-%s'
+            - name: run-api
+              base:
+                apiVersion: cloudplatform.gcp.crossplane.io/v1beta1
+                kind: ProjectService
+                metadata:
+                  labels:
+                    component: api-service
+                spec:
+                  forProvider:
+                    service: run.googleapis.com
+                    disableOnDestroy: false
+                  providerConfigRef:
+                    name: gcp-provider
+              patches:
+                - fromFieldPath: spec.appName
+                  toFieldPath: metadata.name
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'run-api-%s'
+                - fromFieldPath: metadata.name
+                  toFieldPath: spec.forProvider.project
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'prj-%s'
 
-    - name: artifactregistry-api
-      base:
-        apiVersion: cloudplatform.gcp.crossplane.io/v1beta1
-        kind: ProjectService
-        metadata:
-          labels:
-            component: api-service
-        spec:
-          forProvider:
-            service: artifactregistry.googleapis.com
-            disableOnDestroy: false
-          providerConfigRef:
-            name: gcp-provider
-      patches:
-        - fromFieldPath: spec.appName
-          toFieldPath: metadata.name
-          transforms:
-            - type: string
-              string:
-                fmt: 'artifactregistry-api-%s'
-        - fromFieldPath: metadata.name
-          toFieldPath: spec.forProvider.project
-          transforms:
-            - type: string
-              string:
-                fmt: 'prj-%s'
+            - name: artifactregistry-api
+              base:
+                apiVersion: cloudplatform.gcp.crossplane.io/v1beta1
+                kind: ProjectService
+                metadata:
+                  labels:
+                    component: api-service
+                spec:
+                  forProvider:
+                    service: artifactregistry.googleapis.com
+                    disableOnDestroy: false
+                  providerConfigRef:
+                    name: gcp-provider
+              patches:
+                - fromFieldPath: spec.appName
+                  toFieldPath: metadata.name
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'artifactregistry-api-%s'
+                - fromFieldPath: metadata.name
+                  toFieldPath: spec.forProvider.project
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'prj-%s'
 
-    - name: iam-api
-      base:
-        apiVersion: cloudplatform.gcp.crossplane.io/v1beta1
-        kind: ProjectService
-        metadata:
-          labels:
-            component: api-service
-        spec:
-          forProvider:
-            service: iam.googleapis.com
-            disableOnDestroy: false
-          providerConfigRef:
-            name: gcp-provider
-      patches:
-        - fromFieldPath: spec.appName
-          toFieldPath: metadata.name
-          transforms:
-            - type: string
-              string:
-                fmt: 'iam-api-%s'
-        - fromFieldPath: metadata.name
-          toFieldPath: spec.forProvider.project
-          transforms:
-            - type: string
-              string:
-                fmt: 'prj-%s'
+            - name: iam-api
+              base:
+                apiVersion: cloudplatform.gcp.crossplane.io/v1beta1
+                kind: ProjectService
+                metadata:
+                  labels:
+                    component: api-service
+                spec:
+                  forProvider:
+                    service: iam.googleapis.com
+                    disableOnDestroy: false
+                  providerConfigRef:
+                    name: gcp-provider
+              patches:
+                - fromFieldPath: spec.appName
+                  toFieldPath: metadata.name
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'iam-api-%s'
+                - fromFieldPath: metadata.name
+                  toFieldPath: spec.forProvider.project
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'prj-%s'
 
-    # Service Account
-    - name: service-account
-      base:
-        apiVersion: iam.gcp.crossplane.io/v1beta1
-        kind: ServiceAccount
-        metadata:
-          labels:
-            component: service-account
-        spec:
-          forProvider:
-            displayName: Service account for tenant
-            description: Runtime identity for the tenant service
-          providerConfigRef:
-            name: gcp-provider
-      patches:
-        - fromFieldPath: spec.appName
-          toFieldPath: metadata.name
-          transforms:
-            - type: string
-              string:
-                fmt: 'sa-%s'
-        - fromFieldPath: metadata.name
-          toFieldPath: spec.forProvider.project
-          transforms:
-            - type: string
-              string:
-                fmt: 'prj-%s'
-        - fromFieldPath: spec.appName
-          toFieldPath: spec.forProvider.displayName
-          transforms:
-            - type: string
-              string:
-                fmt: 'Service account for %s'
-        - fromFieldPath: spec.teamId
-          toFieldPath: metadata.labels[team]
-        - fromFieldPath: spec.environment
-          toFieldPath: metadata.labels[env]
-      connectionDetails:
-        - fromFieldPath: status.atProvider.email
-          name: gcp-service-account-email
-          type: FromFieldPath
+            # Service Account
+            - name: service-account
+              base:
+                apiVersion: iam.gcp.crossplane.io/v1beta1
+                kind: ServiceAccount
+                metadata:
+                  labels:
+                    component: service-account
+                spec:
+                  forProvider:
+                    displayName: Service account for tenant
+                    description: Runtime identity for the tenant service
+                  providerConfigRef:
+                    name: gcp-provider
+              patches:
+                - fromFieldPath: spec.appName
+                  toFieldPath: metadata.name
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'sa-%s'
+                - fromFieldPath: metadata.name
+                  toFieldPath: spec.forProvider.project
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'prj-%s'
+                - fromFieldPath: spec.appName
+                  toFieldPath: spec.forProvider.displayName
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'Service account for %s'
+                - fromFieldPath: spec.teamId
+                  toFieldPath: metadata.labels[team]
+                - fromFieldPath: spec.environment
+                  toFieldPath: metadata.labels[env]
+              connectionDetails:
+                - fromFieldPath: status.atProvider.email
+                  name: gcp-service-account-email
+                  type: FromFieldPath
 
-    # Artifact Registry Repository
-    - name: artifact-registry
-      base:
-        apiVersion: artifactregistry.gcp.crossplane.io/v1beta1
-        kind: Repository
-        metadata:
-          labels:
-            component: artifact-registry
-        spec:
-          forProvider:
-            format: DOCKER
-            location: us-central1
-            description: Container image repository for the tenant service
-          providerConfigRef:
-            name: gcp-provider
-      patches:
-        - fromFieldPath: spec.appName
-          toFieldPath: metadata.name
-          transforms:
-            - type: string
-              string:
-                fmt: 'repo-%s'
-        - fromFieldPath: metadata.name
-          toFieldPath: spec.forProvider.project
-          transforms:
-            - type: string
-              string:
-                fmt: 'prj-%s'
-        - fromFieldPath: spec.appName
-          toFieldPath: spec.forProvider.repositoryId
-          transforms:
-            - type: string
-              string:
-                fmt: 'repo-%s'
-        - fromFieldPath: spec.teamId
-          toFieldPath: metadata.labels[team]
-        - fromFieldPath: spec.environment
-          toFieldPath: metadata.labels[env]
-        - fromFieldPath: spec.costCenter
-          toFieldPath: metadata.labels[cost-center]
-      connectionDetails:
-        - fromFieldPath: status.atProvider.repositoryUrl
-          name: artifact-registry-url
-          type: FromFieldPath
+            # Artifact Registry Repository
+            - name: artifact-registry
+              base:
+                apiVersion: artifactregistry.gcp.crossplane.io/v1beta1
+                kind: Repository
+                metadata:
+                  labels:
+                    component: artifact-registry
+                spec:
+                  forProvider:
+                    format: DOCKER
+                    location: us-central1
+                    description: Container image repository for the tenant service
+                  providerConfigRef:
+                    name: gcp-provider
+              patches:
+                - fromFieldPath: spec.appName
+                  toFieldPath: metadata.name
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'repo-%s'
+                - fromFieldPath: metadata.name
+                  toFieldPath: spec.forProvider.project
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'prj-%s'
+                - fromFieldPath: spec.appName
+                  toFieldPath: spec.forProvider.repositoryId
+                  transforms:
+                    - type: string
+                      string:
+                        fmt: 'repo-%s'
+                - fromFieldPath: spec.teamId
+                  toFieldPath: metadata.labels[team]
+                - fromFieldPath: spec.environment
+                  toFieldPath: metadata.labels[env]
+                - fromFieldPath: spec.costCenter
+                  toFieldPath: metadata.labels[cost-center]
+              connectionDetails:
+                - fromFieldPath: status.atProvider.repositoryUrl
+                  name: artifact-registry-url
+                  type: FromFieldPath

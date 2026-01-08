@@ -13,9 +13,9 @@ spec:
           kinds:
             - platform.openco.tech/v1alpha1/TenantEnvironment
             - platform.openco.tech/v1alpha1/TenantEnvironmentClaim
-        operations:
-          - UPDATE
-          - DELETE
+          operations:
+            - UPDATE
+            - DELETE
       validate:
         message: |
           Direct modifications to TenantEnvironment resources are restricted.
@@ -39,8 +39,8 @@ spec:
           kinds:
             - platform.openco.tech/v1alpha1/TenantEnvironment
             - platform.openco.tech/v1alpha1/TenantEnvironmentClaim
-        operations:
-          - CREATE
+          operations:
+            - CREATE
       validate:
         message: |
           TenantEnvironment resources must be created through the Backstage Golden Path template.
