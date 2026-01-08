@@ -2,6 +2,7 @@ apiVersion: platform.openco.tech/v1alpha1
 kind: TenantEnvironment
 metadata:
   name: demo-service-hml
+  namespace: demo
 spec:
   appName: demo-service
   environment: hml
