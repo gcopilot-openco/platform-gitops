@@ -59,8 +59,8 @@ spec:
                   transforms:
                     - type: convert
                       convert:
-                        toType: bool
-                        fromType: string
+                        to: bool
+                        from: string
               connectionDetails:
                 - fromFieldPath: status.atProvider.projectNumber
                   name: gcp-project-id
