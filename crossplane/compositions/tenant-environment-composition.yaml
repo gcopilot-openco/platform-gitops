@@ -27,9 +27,6 @@ spec:
                 forProvider:
                   autoCreateNetwork: false
                   billingAccount: '$(BILLING_ACCOUNT_ID)'
-                providerConfigRef:
-                  name: default
-                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
@@ -76,9 +73,6 @@ spec:
                 forProvider:
                   service: compute.googleapis.com
                   disableOnDestroy: false
-                providerConfigRef:
-                  name: default
-                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
@@ -106,9 +100,6 @@ spec:
                 forProvider:
                   service: run.googleapis.com
                   disableOnDestroy: false
-                providerConfigRef:
-                  name: default
-                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
@@ -136,9 +127,6 @@ spec:
                 forProvider:
                   service: artifactregistry.googleapis.com
                   disableOnDestroy: false
-                providerConfigRef:
-                  name: default
-                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
@@ -166,9 +154,6 @@ spec:
                 forProvider:
                   service: iam.googleapis.com
                   disableOnDestroy: false
-                providerConfigRef:
-                  name: default
-                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
@@ -197,9 +182,6 @@ spec:
                 forProvider:
                   displayName: Service account for tenant
                   description: Runtime identity for the tenant service
-                providerConfigRef:
-                  name: default
-                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
@@ -244,9 +226,6 @@ spec:
                   format: DOCKER
                   location: us-central1
                   description: Container image repository for the tenant service
-                providerConfigRef:
-                  name: default
-                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
