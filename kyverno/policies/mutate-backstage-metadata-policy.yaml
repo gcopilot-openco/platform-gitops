@@ -13,8 +13,6 @@ spec:
           kinds:
             - platform.openco.tech/v1alpha1/TenantEnvironment
             - platform.openco.tech/v1alpha1/TenantEnvironmentClaim
-      filter:
-        resources:
           annotations:
             backstage.io/managed-by: 'scaffolder'
       mutate:
