@@ -8,3 +8,6 @@ spec:
   environment: hml
   teamId: platform-team
   costCenter: platform
+  crossplane:
+    compositionRef:
+      name: tenantenvironment.platform.openco.tech
