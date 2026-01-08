@@ -1,0 +1,56 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-direct-edits
+  namespace: kyverno
+spec:
+  validationFailureAction: audit
+  background: false
+  rules:
+    - name: prevent-manual-modifications
+      match:
+        resources:
+          kinds:
+            - platform.openco.tech/v1alpha1/TenantEnvironment
+            - platform.openco.tech/v1alpha1/TenantEnvironmentClaim
+        operations:
+          - UPDATE
+          - DELETE
+      validate:
+        message: |
+          Direct modifications to TenantEnvironment resources are restricted.
+          Only ArgoCD and platform-admins can modify these resources.
+          Please use the Backstage Golden Path template to request changes.
+        deny:
+          conditions:
+            all:
+              - key: '{{request.userInfo.username}}'
+                operator: NotIn
+                value:
+                  - system:serviceaccount:argocd:argocd-application-controller
+              - key: '{{request.userInfo.groups}}'
+                operator: NotIn
+                value:
+                  - platform-admins
+
+    - name: enforce-backstage-source-for-creation
+      match:
+        resources:
+          kinds:
+            - platform.openco.tech/v1alpha1/TenantEnvironment
+            - platform.openco.tech/v1alpha1/TenantEnvironmentClaim
+        operations:
+          - CREATE
+      validate:
+        message: |
+          TenantEnvironment resources must be created through the Backstage Golden Path template.
+          Direct kubectl apply is not permitted.
+        pattern:
+          metadata:
+            annotations:
+              backstage.io/managed-by: 'scaffolder'
+        anyPattern:
+          - metadata:
+              ownerReferences:
+                - kind: Application
+                  name: '?*'

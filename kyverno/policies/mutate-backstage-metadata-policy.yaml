@@ -1,0 +1,37 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: mutate-backstage-metadata
+  namespace: kyverno
+spec:
+  validationFailureAction: audit
+  background: false
+  rules:
+    - name: inject-backstage-labels
+      match:
+        resources:
+          kinds:
+            - platform.openco.tech/v1alpha1/TenantEnvironment
+            - platform.openco.tech/v1alpha1/TenantEnvironmentClaim
+      filter:
+        resources:
+          annotations:
+            backstage.io/managed-by: 'scaffolder'
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            labels:
+              managed-by: backstage
+              provisioner: crossplane
+
+    - name: track-git-source
+      match:
+        resources:
+          kinds:
+            - platform.openco.tech/v1alpha1/TenantEnvironment
+            - platform.openco.tech/v1alpha1/TenantEnvironmentClaim
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            annotations:
+              kyverno.io/last-applied-by: '{{request.userInfo.username}}'

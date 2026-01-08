@@ -1,0 +1,73 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: tenantenvironments.platform.openco.tech
+spec:
+  group: platform.openco.tech
+  names:
+    kind: TenantEnvironment
+    plural: tenantenvironments
+  claimNames:
+    kind: TenantEnvironmentClaim
+    plural: tenantenvironmentclaims
+  connectionSecretKeys:
+    - gcp-project-id
+    - gcp-service-account-email
+    - artifact-registry-url
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          description: A TenantEnvironment provides a complete GCP environment for a service
+          type: object
+          properties:
+            spec:
+              type: object
+              description: Specification of the TenantEnvironment
+              properties:
+                appName:
+                  type: string
+                  description: The name of the application (e.g., payment-service)
+                  pattern: '^[a-z][a-z0-9-]*[a-z0-9]$'
+                  minLength: 1
+                  maxLength: 63
+                environment:
+                  type: string
+                  description: The deployment environment (hml or prod)
+                  enum:
+                    - hml
+                    - prod
+                teamId:
+                  type: string
+                  description: Team identifier for billing and ownership (e.g., finance)
+                  minLength: 1
+                  maxLength: 63
+                costCenter:
+                  type: string
+                  description: Cost center for resource tagging
+                  minLength: 1
+              required:
+                - appName
+                - environment
+                - teamId
+                - costCenter
+            status:
+              type: object
+              description: Status of the TenantEnvironment
+              properties:
+                projectId:
+                  type: string
+                  description: The GCP Project ID
+                serviceAccountEmail:
+                  type: string
+                  description: The service account email for the tenant
+                artifactRegistryUrl:
+                  type: string
+                  description: The Artifact Registry URL for container images
+                ready:
+                  type: boolean
+                  description: Whether all resources are ready
+          required:
+            - spec
