@@ -29,6 +29,7 @@ spec:
                   billingAccount: '$(BILLING_ACCOUNT_ID)'
                 providerConfigRef:
                   name: default
+                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
@@ -77,6 +78,7 @@ spec:
                   disableOnDestroy: false
                 providerConfigRef:
                   name: default
+                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
@@ -106,6 +108,7 @@ spec:
                   disableOnDestroy: false
                 providerConfigRef:
                   name: default
+                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
@@ -135,6 +138,7 @@ spec:
                   disableOnDestroy: false
                 providerConfigRef:
                   name: default
+                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
@@ -164,6 +168,7 @@ spec:
                   disableOnDestroy: false
                 providerConfigRef:
                   name: default
+                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
@@ -194,6 +199,7 @@ spec:
                   description: Runtime identity for the tenant service
                 providerConfigRef:
                   name: default
+                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
@@ -240,6 +246,7 @@ spec:
                   description: Container image repository for the tenant service
                 providerConfigRef:
                   name: default
+                  kind: ProviderConfig
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
