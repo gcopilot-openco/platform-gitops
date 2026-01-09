@@ -56,8 +56,16 @@ spec:
                 toFieldPath: spec.forProvider.template.spec.containers[0].resources.limits.memory
               - fromFieldPath: spec.minInstances
                 toFieldPath: spec.forProvider.template.metadata.annotations["autoscaling.knative.dev/minScale"]
+                transforms:
+                  - type: string
+                    string:
+                      fmt: "%d"
               - fromFieldPath: spec.maxInstances
                 toFieldPath: spec.forProvider.template.metadata.annotations["autoscaling.knative.dev/maxScale"]
+                transforms:
+                  - type: string
+                    string:
+                      fmt: "%d"
               - type: ToCompositeFieldPath
                 fromFieldPath: status.atProvider.uri
                 toFieldPath: status.serviceUrl
