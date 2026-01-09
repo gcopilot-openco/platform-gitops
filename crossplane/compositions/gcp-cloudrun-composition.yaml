@@ -23,8 +23,20 @@ spec:
                 forProvider:
                   location: us-east4
                   template:
-                    - containers:
+                    metadata:
+                      annotations:
+                        autoscaling.knative.dev/minScale: "0"
+                        autoscaling.knative.dev/maxScale: "10"
+                    spec:
+                      containers:
                         - image: us-docker.pkg.dev/cloudrun/container/hello
+                          ports:
+                            - containerPort: 8080
+                          resources:
+                            limits:
+                              cpu: "1000m"
+                              memory: "512Mi"
+                      serviceAccountName: ""
             patches:
               - fromFieldPath: spec.appName
                 toFieldPath: metadata.name
@@ -33,19 +45,19 @@ spec:
               - fromFieldPath: spec.region
                 toFieldPath: spec.forProvider.location
               - fromFieldPath: spec.serviceAccountEmail
-                toFieldPath: spec.forProvider.template[0].serviceAccount
+                toFieldPath: spec.forProvider.template.spec.serviceAccountName
               - fromFieldPath: spec.image
-                toFieldPath: spec.forProvider.template[0].containers[0].image
+                toFieldPath: spec.forProvider.template.spec.containers[0].image
               - fromFieldPath: spec.port
-                toFieldPath: spec.forProvider.template[0].containers[0].ports[0].containerPort
+                toFieldPath: spec.forProvider.template.spec.containers[0].ports[0].containerPort
               - fromFieldPath: spec.cpu
-                toFieldPath: spec.forProvider.template[0].containers[0].resources[0].limits.cpu
+                toFieldPath: spec.forProvider.template.spec.containers[0].resources.limits.cpu
               - fromFieldPath: spec.memory
-                toFieldPath: spec.forProvider.template[0].containers[0].resources[0].limits.memory
+                toFieldPath: spec.forProvider.template.spec.containers[0].resources.limits.memory
               - fromFieldPath: spec.minInstances
-                toFieldPath: spec.forProvider.template[0].scaling[0].minInstanceCount
+                toFieldPath: spec.forProvider.template.metadata.annotations["autoscaling.knative.dev/minScale"]
               - fromFieldPath: spec.maxInstances
-                toFieldPath: spec.forProvider.template[0].scaling[0].maxInstanceCount
+                toFieldPath: spec.forProvider.template.metadata.annotations["autoscaling.knative.dev/maxScale"]
               - type: ToCompositeFieldPath
                 fromFieldPath: status.atProvider.uri
                 toFieldPath: status.serviceUrl
