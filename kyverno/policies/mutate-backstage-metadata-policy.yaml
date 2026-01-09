@@ -12,7 +12,6 @@ spec:
         resources:
           kinds:
             - platform.openco.tech/v1alpha1/AppEnvironment
-            - platform.openco.tech/v1alpha1/AppComposite
           annotations:
             backstage.io/managed-by: 'scaffolder'
       mutate:
@@ -27,7 +26,6 @@ spec:
         resources:
           kinds:
             - platform.openco.tech/v1alpha1/AppEnvironment
-            - platform.openco.tech/v1alpha1/AppComposite
       mutate:
         patchStrategicMerge:
           metadata:

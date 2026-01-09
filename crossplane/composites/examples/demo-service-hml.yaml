@@ -1,5 +1,5 @@
 apiVersion: platform.openco.tech/v1alpha1
-kind: AppComposite
+kind: AppEnvironment
 metadata:
   name: demo-service-hml
   namespace: servicing

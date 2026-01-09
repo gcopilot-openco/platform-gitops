@@ -7,9 +7,6 @@ spec:
   names:
     kind: AppEnvironment
     plural: appenvironments
-  claimNames:
-    kind: AppComposite
-    plural: appcomposites
   scope: Namespaced
   defaultCompositeDeletePolicy: Background
   defaultCompositionRef:
