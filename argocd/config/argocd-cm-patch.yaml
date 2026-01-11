@@ -44,6 +44,7 @@ data:
 
         local synced = false
         local ready = false
+        local healthy = false
 
         for i, condition in ipairs(obj.status.conditions) do
           if condition.type == "Synced" then
@@ -52,19 +53,22 @@ data:
               health_status.message = condition.message
               return health_status
             end
-            if condition.status == "True" then
-              synced = true
-            end
+            if condition.status == "True" then synced = true end
           end
 
-          if condition.type == "Ready" then
-            if condition.status == "True" then
-              ready = true
+          if condition.type == "Ready" or condition.type == "Healthy" then
+            if condition.status == "False" then
+               -- Note: We don't immediately fail on Ready=False because it might be transient 
+               -- but Synced=False is usually a hard configuration error.
+            end
+            if condition.status == "True" then 
+              if condition.type == "Ready" then ready = true end
+              if condition.type == "Healthy" then healthy = true end
             end
           end
         end
 
-        if synced and ready then
+        if synced and (ready or healthy) then
           health_status.status = "Healthy"
           health_status.message = "Resource is healthy and synced."
         end
@@ -107,6 +111,8 @@ data:
 
         local synced = false
         local ready = false
+        local healthy = false
+        local installed = false
 
         for i, condition in ipairs(obj.status.conditions) do
           if condition.type == "Synced" then
@@ -115,21 +121,46 @@ data:
               health_status.message = condition.message
               return health_status
             end
-            if condition.status == "True" then
-              synced = true
-            end
+            if condition.status == "True" then synced = true end
           end
 
-          if contains({"Ready", "Healthy", "Offered", "Established", "ValidPipeline", "RevisionHealthy"}, condition.type) then
-            if condition.status == "True" then
-              ready = true
+          if contains({"Ready", "Offered", "Established", "ValidPipeline", "RevisionHealthy"}, condition.type) then
+            if condition.status == "True" then ready = true end
+          end
+
+          if condition.type == "Healthy" then
+            if condition.status == "False" then
+              health_status.status = "Degraded"
+              health_status.message = condition.message
+              return health_status
             end
+            if condition.status == "True" then healthy = true end
+          end
+
+          if condition.type == "Installed" then
+            if condition.status == "True" then installed = true end
           end
         end
 
+        -- Managed Resources / Compositions logic
         if synced and ready then
           health_status.status = "Healthy"
           health_status.message = "Resource is healthy and synced."
+          return health_status
+        end
+
+        -- Providers / Packages logic
+        if healthy and installed then
+          health_status.status = "Healthy"
+          health_status.message = "Package is healthy and installed."
+          return health_status
+        end
+
+        -- Fallback for resources that only use Healthy (like some Functions)
+        if healthy and not synced and not ready and not installed then
+          health_status.status = "Healthy"
+          health_status.message = "Resource is healthy."
+          return health_status
         end
 
         return health_status
