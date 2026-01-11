@@ -1,0 +1,10 @@
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: test-vpc-attachment
+  namespace: sre
+spec:
+  appName: test-vpc-attachment
+  environment: sandbox
+  teamId: sre
+  costCenter: CC-TEST-001
