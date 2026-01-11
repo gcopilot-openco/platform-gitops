@@ -99,8 +99,39 @@ spec:
                 cloudRunUrl:
                   type: string
                   description: The Cloud Run service URL
+                projectStatus:
+                  type: string
+                  description: Detailed status of the GCP Project
+                identityStatus:
+                  type: string
+                  description: Detailed status of the GCP Identity (IAM)
+                artifactStatus:
+                  type: string
+                  description: Detailed status of the Artifact Registry
+                secretStatus:
+                  type: string
+                  description: Detailed status of the Secret Manager
+                cloudRunStatus:
+                  type: string
+                  description: Detailed status of the Cloud Run service
                 ready:
                   type: boolean
                   description: Whether all resources are ready
           required:
             - spec
+      additionalPrinterColumns:
+        - name: READY
+          type: string
+          jsonPath: .status.conditions[?(@.type=='Ready')].status
+        - name: SYNCED
+          type: string
+          jsonPath: .status.conditions[?(@.type=='Synced')].status
+        - name: PROJECT
+          type: string
+          jsonPath: .status.projectId
+        - name: CLOUD-RUN
+          type: string
+          jsonPath: .status.cloudRunUrl
+        - name: AGE
+          type: date
+          jsonPath: .metadata.creationTimestamp

@@ -32,6 +32,14 @@ spec:
               - type: ToCompositeFieldPath
                 fromFieldPath: status.projectId
                 toFieldPath: status.projectId
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.conditions[?(@.type=='Ready')].status
+                toFieldPath: status.projectStatus
+            readinessChecks:
+              - type: MatchCondition
+                matchCondition:
+                  type: Ready
+                  status: "True"
 
           # 2. Create GCPIdentity XR
           - name: gcp-identity-xr
@@ -50,6 +58,14 @@ spec:
               - type: ToCompositeFieldPath
                 fromFieldPath: status.serviceAccountEmail
                 toFieldPath: status.serviceAccountEmail
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.conditions[?(@.type=='Ready')].status
+                toFieldPath: status.identityStatus
+            readinessChecks:
+              - type: MatchCondition
+                matchCondition:
+                  type: Ready
+                  status: "True"
 
           # 3. Create GCPArtifact XR
           - name: gcp-artifact-xr
@@ -72,6 +88,14 @@ spec:
               - type: ToCompositeFieldPath
                 fromFieldPath: status.repositoryUrl
                 toFieldPath: status.artifactRegistryUrl
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.conditions[?(@.type=='Ready')].status
+                toFieldPath: status.artifactStatus
+            readinessChecks:
+              - type: MatchCondition
+                matchCondition:
+                  type: Ready
+                  status: "True"
 
           # 4. Create GCPSecretManager XR
           - name: gcp-secretmanager-xr
@@ -85,6 +109,14 @@ spec:
                 toFieldPath: spec.projectId
               - fromFieldPath: spec.secretManager.secrets
                 toFieldPath: spec.secrets
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.conditions[?(@.type=='Ready')].status
+                toFieldPath: status.secretStatus
+            readinessChecks:
+              - type: MatchCondition
+                matchCondition:
+                  type: Ready
+                  status: "True"
 
           # 5. Create GCPCloudRun XR
           - name: gcp-cloudrun-xr
@@ -109,6 +141,14 @@ spec:
               - type: ToCompositeFieldPath
                 fromFieldPath: status.serviceUrl
                 toFieldPath: status.cloudRunUrl
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.conditions[?(@.type=='Ready')].status
+                toFieldPath: status.cloudRunStatus
+            readinessChecks:
+              - type: MatchCondition
+                matchCondition:
+                  type: Ready
+                  status: "True"
 
     - step: auto-ready
       functionRef:
