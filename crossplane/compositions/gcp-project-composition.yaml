@@ -67,6 +67,39 @@ spec:
                 fromFieldPath: status.atProvider.number
                 toFieldPath: status.projectNumber
 
+          - name: sharedvpc-service-project
+            base:
+              apiVersion: compute.gcp.m.upbound.io/v1beta1
+              kind: SharedVPCServiceProject
+              spec:
+                forProvider: {}
+            patches:
+              - type: CombineFromComposite
+                combine:
+                  variables:
+                    - fromFieldPath: spec.environment
+                    - fromFieldPath: spec.appName
+                  strategy: string
+                  string:
+                    fmt: 'prj-%s-%s'
+                toFieldPath: spec.forProvider.serviceProject
+              - fromFieldPath: spec.environment
+                toFieldPath: spec.forProvider.hostProject
+                transforms:
+                  - type: map
+                    map:
+                      hml: prj-networking-hmg-438117
+                      prod: prj-networking-prd-438117
+                      sandbox: prj-networking-sandbox-455812
+              - type: CombineFromComposite
+                combine:
+                  variables:
+                    - fromFieldPath: spec.appName
+                  strategy: string
+                  string:
+                    fmt: 'svpc-link-%s'
+                toFieldPath: metadata.name
+
           - name: compute-api
             base:
               apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
