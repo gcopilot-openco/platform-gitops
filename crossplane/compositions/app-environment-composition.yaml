@@ -32,9 +32,7 @@ spec:
               - type: ToCompositeFieldPath
                 fromFieldPath: status.projectId
                 toFieldPath: status.projectId
-              - type: ToCompositeFieldPath
                 fromFieldPath: status.conditions[?(@.type=='Ready')].status
-                toFieldPath: status.projectStatus
             readinessChecks:
               - type: MatchCondition
                 matchCondition:
@@ -58,8 +56,6 @@ spec:
               - type: ToCompositeFieldPath
                 fromFieldPath: status.serviceAccountEmail
                 toFieldPath: status.serviceAccountEmail
-              - type: ToCompositeFieldPath
-                fromFieldPath: status.conditions[?(@.type=='Ready')].status
                 toFieldPath: status.identityStatus
             readinessChecks:
               - type: MatchCondition
@@ -88,8 +84,6 @@ spec:
               - type: ToCompositeFieldPath
                 fromFieldPath: status.repositoryUrl
                 toFieldPath: status.artifactRegistryUrl
-              - type: ToCompositeFieldPath
-                fromFieldPath: status.conditions[?(@.type=='Ready')].status
                 toFieldPath: status.artifactStatus
             readinessChecks:
               - type: MatchCondition
@@ -109,8 +103,6 @@ spec:
                 toFieldPath: spec.projectId
               - fromFieldPath: spec.secretManager.secrets
                 toFieldPath: spec.secrets
-              - type: ToCompositeFieldPath
-                fromFieldPath: status.conditions[?(@.type=='Ready')].status
                 toFieldPath: status.secretStatus
             readinessChecks:
               - type: MatchCondition
@@ -141,8 +133,6 @@ spec:
               - type: ToCompositeFieldPath
                 fromFieldPath: status.serviceUrl
                 toFieldPath: status.cloudRunUrl
-              - type: ToCompositeFieldPath
-                fromFieldPath: status.conditions[?(@.type=='Ready')].status
                 toFieldPath: status.cloudRunStatus
             readinessChecks:
               - type: MatchCondition
