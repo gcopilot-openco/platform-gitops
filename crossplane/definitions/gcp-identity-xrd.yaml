@@ -7,6 +7,11 @@ spec:
   names:
     kind: GCPIdentity
     plural: gcpidentities
+  scope: Namespaced
+  defaultCompositeDeletePolicy: Background
+  defaultCompositionRef:
+    name: gcpidentity.platform.openco.tech
+  defaultCompositionUpdatePolicy: Automatic
   versions:
     - name: v1alpha1
       served: true

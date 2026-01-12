@@ -7,6 +7,11 @@ spec:
   names:
     kind: GCPProject
     plural: gcpprojects
+  scope: Namespaced
+  defaultCompositeDeletePolicy: Background
+  defaultCompositionRef:
+    name: gcpproject.platform.openco.tech
+  defaultCompositionUpdatePolicy: Automatic
   versions:
     - name: v1alpha1
       served: true
@@ -30,6 +35,9 @@ spec:
                 billingAccount:
                   type: string
                   default: "0182B4-2FC191-0FCF10"
+                deletionPolicy:
+                  type: string
+                  default: "DELETE"
                 orgId:
                   type: string
                   default: "875387917387"
@@ -45,5 +53,8 @@ spec:
                   type: string
                 projectNumber:
                   type: string
+                message:
+                  type: string
+                  description: Human-readable status message including any errors
                 ready:
                   type: boolean

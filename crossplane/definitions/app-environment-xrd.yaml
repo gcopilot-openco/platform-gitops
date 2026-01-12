@@ -114,6 +114,9 @@ spec:
                 cloudRunStatus:
                   type: string
                   description: Detailed status of the Cloud Run service
+                message:
+                  type: string
+                  description: Human-readable status message including any errors
                 ready:
                   type: boolean
                   description: Whether all resources are ready

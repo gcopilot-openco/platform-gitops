@@ -7,6 +7,11 @@ spec:
   names:
     kind: GCPArtifact
     plural: gcpartifacts
+  scope: Namespaced
+  defaultCompositeDeletePolicy: Background
+  defaultCompositionRef:
+    name: gcpartifact.platform.openco.tech
+  defaultCompositionUpdatePolicy: Automatic
   versions:
     - name: v1alpha1
       served: true
@@ -47,5 +52,8 @@ spec:
                   type: string
                 repositoryName:
                   type: string
+                message:
+                  type: string
+                  description: Human-readable status message including any errors
                 ready:
                   type: boolean
