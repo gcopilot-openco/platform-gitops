@@ -70,6 +70,35 @@ spec:
                 fromFieldPath: status.atProvider.uri
                 toFieldPath: status.serviceUrl
 
+    - step: status-handler
+      functionRef:
+        name: function-status-transformer
+      input:
+        apiVersion: function-status-transformer.fn.crossplane.io/v1beta1
+        kind: StatusTransformation
+        statusConditionHooks:
+          # Cloud Run service deployment errors
+          - matchers:
+              - resources:
+                  - name: "cloudrun-service"
+                conditions:
+                  - type: Synced
+                    status: "False"
+                    reason: ReconcileError
+            setConditions:
+              - target: CompositeAndClaim
+                condition:
+                  type: Ready
+                  status: "False"
+                  reason: DeploymentFailed
+                  message: "Failed to deploy Cloud Run service"
+            createEvents:
+              - target: CompositeAndClaim
+                event:
+                  type: Warning
+                  reason: DeploymentFailed
+                  message: "Cloud Run service deployment failed"
+
     - step: auto-ready
       functionRef:
         name: function-auto-ready

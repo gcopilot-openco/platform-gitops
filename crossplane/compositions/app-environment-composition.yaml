@@ -112,6 +112,97 @@ spec:
                   type: Ready
                   status: "True"
 
+    - step: status-handler
+      functionRef:
+        name: function-status-transformer
+      input:
+        apiVersion: function-status-transformer.fn.crossplane.io/v1beta1
+        kind: StatusTransformation
+        statusConditionHooks:
+          # GCPProject XR errors
+          - matchers:
+              - resources:
+                  - name: "gcp-project-xr"
+                conditions:
+                  - type: Synced
+                    status: "False"
+            setConditions:
+              - target: CompositeAndClaim
+                condition:
+                  type: Ready
+                  status: "False"
+                  reason: ProjectFailed
+                  message: "GCP Project provisioning failed - check GCPProject resource"
+            createEvents:
+              - target: CompositeAndClaim
+                event:
+                  type: Warning
+                  reason: ProjectFailed
+                  message: "GCP Project failed"
+
+          # GCPArtifact XR errors
+          - matchers:
+              - resources:
+                  - name: "gcp-artifact-xr"
+                conditions:
+                  - type: Synced
+                    status: "False"
+            setConditions:
+              - target: CompositeAndClaim
+                condition:
+                  type: Ready
+                  status: "False"
+                  reason: ArtifactFailed
+                  message: "Artifact Registry failed - check GCPArtifact resource"
+            createEvents:
+              - target: CompositeAndClaim
+                event:
+                  type: Warning
+                  reason: ArtifactFailed
+                  message: "Artifact Registry failed"
+
+          # GCPSecretManager XR errors
+          - matchers:
+              - resources:
+                  - name: "gcp-secretmanager-xr"
+                conditions:
+                  - type: Synced
+                    status: "False"
+            setConditions:
+              - target: CompositeAndClaim
+                condition:
+                  type: Ready
+                  status: "False"
+                  reason: SecretManagerFailed
+                  message: "Secret Manager failed - check GCPSecretManager resource"
+            createEvents:
+              - target: CompositeAndClaim
+                event:
+                  type: Warning
+                  reason: SecretManagerFailed
+                  message: "Secret Manager failed"
+
+          # GCPCloudRun XR errors
+          - matchers:
+              - resources:
+                  - name: "gcp-cloudrun-xr"
+                conditions:
+                  - type: Synced
+                    status: "False"
+            setConditions:
+              - target: CompositeAndClaim
+                condition:
+                  type: Ready
+                  status: "False"
+                  reason: CloudRunFailed
+                  message: "Cloud Run failed - check GCPCloudRun resource"
+            createEvents:
+              - target: CompositeAndClaim
+                event:
+                  type: Warning
+                  reason: CloudRunFailed
+                  message: "Cloud Run failed"
+
     - step: auto-ready
       functionRef:
         name: function-auto-ready

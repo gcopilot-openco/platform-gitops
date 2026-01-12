@@ -50,6 +50,35 @@ spec:
                 fromFieldPath: metadata.name
                 toFieldPath: status.repositoryName
 
+    - step: status-handler
+      functionRef:
+        name: function-status-transformer
+      input:
+        apiVersion: function-status-transformer.fn.crossplane.io/v1beta1
+        kind: StatusTransformation
+        statusConditionHooks:
+          # Registry creation errors
+          - matchers:
+              - resources:
+                  - name: "artifact-registry"
+                conditions:
+                  - type: Synced
+                    status: "False"
+                    reason: ReconcileError
+            setConditions:
+              - target: CompositeAndClaim
+                condition:
+                  type: Ready
+                  status: "False"
+                  reason: RegistryFailed
+                  message: "Failed to create Artifact Registry"
+            createEvents:
+              - target: CompositeAndClaim
+                event:
+                  type: Warning
+                  reason: RegistryFailed
+                  message: "Artifact Registry creation failed"
+
     - step: auto-ready
       functionRef:
         name: function-auto-ready

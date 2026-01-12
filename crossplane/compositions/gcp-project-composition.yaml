@@ -235,6 +235,79 @@ spec:
                     fmt: 'secretmanager-api-%s'
                 toFieldPath: metadata.name
 
+    - step: status-handler
+      functionRef:
+        name: function-status-transformer
+      input:
+        apiVersion: function-status-transformer.fn.crossplane.io/v1beta1
+        kind: StatusTransformation
+        statusConditionHooks:
+          # Project creation errors
+          - matchers:
+              - resources:
+                  - name: "project"
+                conditions:
+                  - type: Synced
+                    status: "False"
+                    reason: ReconcileError
+            setConditions:
+              - target: CompositeAndClaim
+                condition:
+                  type: Ready
+                  status: "False"
+                  reason: ProjectFailed
+                  message: "Failed to create GCP project"
+            createEvents:
+              - target: CompositeAndClaim
+                event:
+                  type: Warning
+                  reason: ProjectFailed
+                  message: "GCP project creation failed"
+
+          # SharedVPC linking errors
+          - matchers:
+              - resources:
+                  - name: "sharedvpc-service-project"
+                conditions:
+                  - type: Synced
+                    status: "False"
+                    reason: ReconcileError
+            setConditions:
+              - target: CompositeAndClaim
+                condition:
+                  type: Ready
+                  status: "False"
+                  reason: SharedVPCFailed
+                  message: "Failed to link to SharedVPC"
+            createEvents:
+              - target: CompositeAndClaim
+                event:
+                  type: Warning
+                  reason: SharedVPCFailed
+                  message: "SharedVPC link failed"
+
+          # API enablement errors (generic for all APIs)
+          - matchers:
+              - resources:
+                  - name: ".*-api"
+                conditions:
+                  - type: Synced
+                    status: "False"
+                    reason: ReconcileError
+            setConditions:
+              - target: CompositeAndClaim
+                condition:
+                  type: Ready
+                  status: "False"
+                  reason: APIEnablementFailed
+                  message: "Failed to enable required GCP APIs"
+            createEvents:
+              - target: CompositeAndClaim
+                event:
+                  type: Warning
+                  reason: APIEnablementFailed
+                  message: "GCP API enablement failed"
+
     - step: auto-ready
       functionRef:
         name: function-auto-ready
