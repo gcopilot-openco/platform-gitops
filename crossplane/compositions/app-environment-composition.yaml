@@ -32,7 +32,6 @@ spec:
               - type: ToCompositeFieldPath
                 fromFieldPath: status.projectId
                 toFieldPath: status.projectId
-            readinessChecks:
               - type: MatchCondition
                 matchCondition:
                   type: Ready
