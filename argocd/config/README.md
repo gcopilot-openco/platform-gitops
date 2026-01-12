@@ -47,46 +47,76 @@ controller:
 
 The health check configuration follows the [official Crossplane + ArgoCD integration guide](https://docs.crossplane.io/latest/guides/crossplane-with-argo-cd/).
 
+### Philosophy: Detailed Health Checks for XRs, Built-in for Infrastructure
+
+We only define custom health checks for our **composite resources (XRs)** at `platform.openco.tech/*`. For Crossplane infrastructure components (Providers, XRDs, Compositions), we rely on ArgoCD's built-in health checks where available.
+
 ### Custom Platform Resources (platform.openco.tech/*)
 
-#### AppEnvironment
+These are our **business-level abstractions** that need detailed health visibility:
+
+#### AppEnvironment (Top-level Composite)
 - **Progressing**: Resource is being provisioned, waiting for conditions
 - **Healthy**: Both `Synced=True` AND `Ready=True`
 - **Degraded**: Either `Synced=False` OR `Ready=False` with error message
 
-#### GCPProject and Other Composite Resources
+#### GCPProject, GCPArtifact, GCPSecretManager, GCPCloudRun (Child Composites)
 Similar logic checking Synced and Ready conditions from Crossplane status.
 
-### Core Crossplane Resources (*.crossplane.io/*)
+**Why custom health checks?** These resources represent your application infrastructure. Detailed health checks provide:
+- Clear visibility into provisioning status
+- Propagation of child resource health to parent
+- Early warning of configuration errors
 
-Health assessment based on official Crossplane recommendations:
+### Crossplane Infrastructure Components
+
+#### Providers (pkg.crossplane.io/Provider)
+- **Uses ArgoCD built-in health check** from [upstream](https://github.com/argoproj/argo-cd/blob/master/resource_customizations/pkg.crossplane.io/Provider/health.lua)
+- **Healthy**: When `Installed=True` AND `Healthy=True`
+- **Degraded**: If either condition is False
+- **Progressing**: Waiting for installation
+
+**No custom configuration needed** - ArgoCD has native support.
+
+#### Functions (pkg.crossplane.io/Function)
+- **Custom health check** (minimal implementation)
+- **Healthy**: When `Installed=True` AND `Healthy=True`
+- **Progressing**: Installation in progress
+
+**Why custom?** Functions don't have ArgoCD built-in support yet.
 
 #### CompositeResourceDefinitions (XRDs)
-- **Healthy**: When `Established=True` condition is present
-- **Progressing**: No status or conditions not yet set
-- **Degraded**: If `Synced=False` (configuration error)
+- **No health checks configured** - XRDs are schema definitions
+- ArgoCD treats them as standard Kubernetes CRDs
+- Once applied, they're established in the API server
 
-**Note**: XRDs only have `Established` conditions, not `Synced` or `Ready`. The health check correctly handles this by accepting any of: `Ready`, `Offered`, `Established`, `ValidPipeline`, or `RevisionHealthy` as indicators of health.
+**Why no health check?** XRDs are infrastructure metadata, not runtime resources. Once synced, they're operational.
 
-#### Compositions and Configuration Resources
-Resources without status (Composition, CompositionRevision, ProviderConfig, etc.) are marked as **Healthy** immediately since they are template definitions.
+#### Compositions
+- **No health checks configured** - Compositions are templates
+- Similar to XRDs, they're configuration not runtime state
 
-#### Managed Resources
-- **Healthy**: When any of `Ready`, `Offered`, or `Established` = `True`
-- **Degraded**: If `Synced=False` or `LastAsyncOperation=False`
-- **Progressing**: Waiting for conditions to be set
-
-#### Provider Packages
-- **Healthy**: When `Healthy=True` AND `Installed=True`
-- **Degraded**: If `Healthy=False`
-- **Progressing**: Installation in progress
+#### Managed Resources (*.upbound.io/*)
+- **Custom health check** for provider-specific managed resources
+- **Healthy**: When `Synced=True` AND (`Ready=True` OR `Healthy=True`)
+- **Degraded**: If `Synced=False`
+- **Progressing**: Waiting for conditions
 
 ### Status Propagation
 
 Crossplane's `function-auto-ready` propagates child resource status to parent composites:
-- Parent AppEnvironment health reflects all child resources (GCPProject, GCPArtifact, etc.)
-- ArgoCD only tracks parent resources in Git, child resources are dynamically created
-- This provides a single health indicator for the entire infrastructure stack
+
+```
+AppEnvironment (Tracked in Git by ArgoCD)
+├── GCPProject (Dynamic child) → Ready=True
+├── GCPArtifact (Dynamic child) → Ready=True
+├── GCPSecretManager (Dynamic child) → Ready=True
+└── GCPCloudRun (Dynamic child) → Ready=True
+    ↓
+AppEnvironment: Ready=True (aggregated status)
+```
+
+**Key insight:** ArgoCD only tracks parent XRs in Git. Child resources are dynamically created by Crossplane. Health status bubbles up through composition functions, giving you a single health indicator for the entire infrastructure stack.
 
 ## References
 
