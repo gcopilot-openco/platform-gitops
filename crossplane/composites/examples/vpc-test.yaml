@@ -1,10 +1,10 @@
 apiVersion: platform.openco.tech/v1alpha1
 kind: AppEnvironment
 metadata:
-  name: vpc-test-v2
+  name: vpc-test-v3
   namespace: sre
 spec:
-  appName: vpc-test-v2
-  environment: sandbox
+  appName: vpc-test-v3
+  environment: hml
   teamId: sre
   costCenter: CC-TEST-001
