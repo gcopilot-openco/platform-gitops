@@ -1,0 +1,10 @@
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: sequencer-test-v1
+  namespace: sre
+spec:
+  appName: sequencer-test-v1
+  environment: sandbox
+  teamId: sre
+  costCenter: CC-TEST-002
