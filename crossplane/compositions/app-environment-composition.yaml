@@ -32,28 +32,6 @@ spec:
               - type: ToCompositeFieldPath
                 fromFieldPath: status.projectId
                 toFieldPath: status.projectId
-              - type: MatchCondition
-                matchCondition:
-                  type: Ready
-                  status: "True"
-
-          # 2. Create GCPIdentity XR
-          - name: gcp-identity-xr
-            base:
-              apiVersion: platform.openco.tech/v1alpha1
-              kind: GCPIdentity
-            patches:
-              - fromFieldPath: spec.appName
-                toFieldPath: spec.appName
-              - fromFieldPath: spec.teamId
-                toFieldPath: spec.teamId
-              - fromFieldPath: spec.environment
-                toFieldPath: spec.environment
-              - fromFieldPath: status.projectId
-                toFieldPath: spec.projectId
-              - type: ToCompositeFieldPath
-                fromFieldPath: status.serviceAccountEmail
-                toFieldPath: status.serviceAccountEmail
             readinessChecks:
               - type: MatchCondition
                 matchCondition:
