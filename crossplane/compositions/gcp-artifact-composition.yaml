@@ -57,27 +57,51 @@ spec:
         apiVersion: function-status-transformer.fn.crossplane.io/v1beta1
         kind: StatusTransformation
         statusConditionHooks:
-          # Registry creation errors
-          - matchers:
-              - resources:
-                  - name: "artifact-registry"
-                conditions:
-                  - type: Synced
-                    status: "False"
-                    reason: ReconcileError
-            setConditions:
-              - target: CompositeAndClaim
-                condition:
-                  type: Ready
-                  status: "False"
-                  reason: RegistryFailed
-                  message: "Failed to create Artifact Registry"
-            createEvents:
-              - target: CompositeAndClaim
-                event:
-                  type: Warning
-                  reason: RegistryFailed
-                  message: "Artifact Registry creation failed"
+           # Registry creation errors
+           - matchers:
+               - resources:
+                   - name: "artifact-registry"
+                 conditions:
+                   - type: Synced
+                     status: "False"
+                     reason: ReconcileError
+             setConditions:
+               - target: CompositeAndClaim
+                 condition:
+                   type: Ready
+                   status: "False"
+                   reason: RegistryFailed
+                   message: "Failed to create Artifact Registry"
+             createEvents:
+               - target: CompositeAndClaim
+                 event:
+                   type: Warning
+                   reason: RegistryFailed
+                   message: "Artifact Registry creation failed"
+
+           # Success condition - Registry ready (placed LAST to override failures with force: true)
+           - matchers:
+               - resources:
+                   - name: "artifact-registry"
+                 conditions:
+                   - type: Synced
+                     status: "True"
+                   - type: Ready
+                     status: "True"
+             setConditions:
+               - target: CompositeAndClaim
+                 force: true
+                 condition:
+                   type: Ready
+                   status: "True"
+                   reason: RegistryReady
+                   message: "Artifact Registry successfully created and ready"
+             createEvents:
+               - target: CompositeAndClaim
+                 event:
+                   type: Normal
+                   reason: RegistryReady
+                   message: "Artifact Registry successfully provisioned"
 
     - step: auto-ready
       functionRef:

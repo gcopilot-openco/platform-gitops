@@ -58,13 +58,13 @@ spec:
               required:
                 - appName
                 - projectId
-             status:
-               type: object
-               properties:
-                 serviceUrl:
-                   type: string
-                 message:
-                   type: string
-                   description: Human-readable status message including any errors
-                 ready:
-                   type: boolean
+            status:
+              type: object
+              properties:
+                serviceUrl:
+                  type: string
+                message:
+                  type: string
+                  description: Human-readable status message including any errors
+                ready:
+                  type: boolean

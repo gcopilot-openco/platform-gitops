@@ -116,92 +116,141 @@ spec:
       functionRef:
         name: function-status-transformer
       input:
-        apiVersion: function-status-transformer.fn.crossplane.io/v1beta1
-        kind: StatusTransformation
-        statusConditionHooks:
-          # GCPProject XR errors
-          - matchers:
-              - resources:
-                  - name: "gcp-project-xr"
-                conditions:
-                  - type: Synced
-                    status: "False"
-            setConditions:
-              - target: CompositeAndClaim
-                condition:
-                  type: Ready
-                  status: "False"
-                  reason: ProjectFailed
-                  message: "GCP Project provisioning failed - check GCPProject resource"
-            createEvents:
-              - target: CompositeAndClaim
-                event:
-                  type: Warning
-                  reason: ProjectFailed
-                  message: "GCP Project failed"
+         apiVersion: function-status-transformer.fn.crossplane.io/v1beta1
+         kind: StatusTransformation
+         statusConditionHooks:
+           # 1. GCPProject XR - Detect failures or not-ready status
+           - matchers:
+               - resources:
+                   - name: "gcp-project-xr"
+                 conditions:
+                   - type: Synced
+                     status: "False"
+                   - type: Ready
+                     status: "False"
+                 type: AnyResourceMatchesAnyCondition
+             setConditions:
+               - target: CompositeAndClaim
+                 condition:
+                   type: Ready
+                   status: "False"
+                   reason: ProjectFailed
+                   message: "GCP Project is unhealthy - check GCPProject resource status"
+             createEvents:
+               - target: CompositeAndClaim
+                 event:
+                   type: Warning
+                   reason: ProjectFailed
+                   message: "GCP Project failed or not ready"
 
-          # GCPArtifact XR errors
-          - matchers:
-              - resources:
-                  - name: "gcp-artifact-xr"
-                conditions:
-                  - type: Synced
-                    status: "False"
-            setConditions:
-              - target: CompositeAndClaim
-                condition:
-                  type: Ready
-                  status: "False"
-                  reason: ArtifactFailed
-                  message: "Artifact Registry failed - check GCPArtifact resource"
-            createEvents:
-              - target: CompositeAndClaim
-                event:
-                  type: Warning
-                  reason: ArtifactFailed
-                  message: "Artifact Registry failed"
+           # 2. GCPArtifact XR - Detect failures or not-ready status
+           - matchers:
+               - resources:
+                   - name: "gcp-artifact-xr"
+                 conditions:
+                   - type: Synced
+                     status: "False"
+                   - type: Ready
+                     status: "False"
+                 type: AnyResourceMatchesAnyCondition
+             setConditions:
+               - target: CompositeAndClaim
+                 condition:
+                   type: Ready
+                   status: "False"
+                   reason: ArtifactFailed
+                   message: "Artifact Registry is unhealthy - check GCPArtifact resource status"
+             createEvents:
+               - target: CompositeAndClaim
+                 event:
+                   type: Warning
+                   reason: ArtifactFailed
+                   message: "Artifact Registry failed or not ready"
 
-          # GCPSecretManager XR errors
-          - matchers:
-              - resources:
-                  - name: "gcp-secretmanager-xr"
-                conditions:
-                  - type: Synced
-                    status: "False"
-            setConditions:
-              - target: CompositeAndClaim
-                condition:
-                  type: Ready
-                  status: "False"
-                  reason: SecretManagerFailed
-                  message: "Secret Manager failed - check GCPSecretManager resource"
-            createEvents:
-              - target: CompositeAndClaim
-                event:
-                  type: Warning
-                  reason: SecretManagerFailed
-                  message: "Secret Manager failed"
+           # 3. GCPSecretManager XR - Detect failures or not-ready status
+           - matchers:
+               - resources:
+                   - name: "gcp-secretmanager-xr"
+                 conditions:
+                   - type: Synced
+                     status: "False"
+                   - type: Ready
+                     status: "False"
+                 type: AnyResourceMatchesAnyCondition
+             setConditions:
+               - target: CompositeAndClaim
+                 condition:
+                   type: Ready
+                   status: "False"
+                   reason: SecretManagerFailed
+                   message: "Secret Manager is unhealthy - check GCPSecretManager resource status"
+             createEvents:
+               - target: CompositeAndClaim
+                 event:
+                   type: Warning
+                   reason: SecretManagerFailed
+                   message: "Secret Manager failed or not ready"
 
-          # GCPCloudRun XR errors
-          - matchers:
-              - resources:
-                  - name: "gcp-cloudrun-xr"
-                conditions:
-                  - type: Synced
-                    status: "False"
-            setConditions:
-              - target: CompositeAndClaim
-                condition:
-                  type: Ready
-                  status: "False"
-                  reason: CloudRunFailed
-                  message: "Cloud Run failed - check GCPCloudRun resource"
-            createEvents:
-              - target: CompositeAndClaim
-                event:
-                  type: Warning
-                  reason: CloudRunFailed
-                  message: "Cloud Run failed"
+           # 4. GCPCloudRun XR - Detect failures or not-ready status
+           - matchers:
+               - resources:
+                   - name: "gcp-cloudrun-xr"
+                 conditions:
+                   - type: Synced
+                     status: "False"
+                   - type: Ready
+                     status: "False"
+                 type: AnyResourceMatchesAnyCondition
+             setConditions:
+               - target: CompositeAndClaim
+                 condition:
+                   type: Ready
+                   status: "False"
+                   reason: CloudRunFailed
+                   message: "Cloud Run is unhealthy - check GCPCloudRun resource status"
+             createEvents:
+               - target: CompositeAndClaim
+                 event:
+                   type: Warning
+                   reason: CloudRunFailed
+                   message: "Cloud Run failed or not ready"
+
+           # 5. All child XRs healthy - Set success condition (placed LAST to override failures with force: true)
+           - matchers:
+               - resources:
+                   - name: "gcp-project-xr"
+                 conditions:
+                   - type: Ready
+                     status: "True"
+               - resources:
+                   - name: "gcp-artifact-xr"
+                 conditions:
+                   - type: Ready
+                     status: "True"
+               - resources:
+                   - name: "gcp-secretmanager-xr"
+                 conditions:
+                   - type: Ready
+                     status: "True"
+               - resources:
+                   - name: "gcp-cloudrun-xr"
+                 conditions:
+                   - type: Ready
+                     status: "True"
+             setConditions:
+               - target: CompositeAndClaim
+                 force: true
+                 condition:
+                   type: Ready
+                   status: "True"
+                   reason: AllResourcesReady
+                   message: "All application resources are healthy and operational"
+             createEvents:
+               - target: CompositeAndClaim
+                 event:
+                   type: Normal
+                   reason: AppEnvironmentReady
+                   message: "Application environment fully provisioned and ready"
 
     - step: auto-ready
       functionRef:

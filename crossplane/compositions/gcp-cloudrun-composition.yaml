@@ -77,27 +77,51 @@ spec:
         apiVersion: function-status-transformer.fn.crossplane.io/v1beta1
         kind: StatusTransformation
         statusConditionHooks:
-          # Cloud Run service deployment errors
-          - matchers:
-              - resources:
-                  - name: "cloudrun-service"
-                conditions:
-                  - type: Synced
-                    status: "False"
-                    reason: ReconcileError
-            setConditions:
-              - target: CompositeAndClaim
-                condition:
-                  type: Ready
-                  status: "False"
-                  reason: DeploymentFailed
-                  message: "Failed to deploy Cloud Run service"
-            createEvents:
-              - target: CompositeAndClaim
-                event:
-                  type: Warning
-                  reason: DeploymentFailed
-                  message: "Cloud Run service deployment failed"
+           # Cloud Run service deployment errors
+           - matchers:
+               - resources:
+                   - name: "cloudrun-service"
+                 conditions:
+                   - type: Synced
+                     status: "False"
+                     reason: ReconcileError
+             setConditions:
+               - target: CompositeAndClaim
+                 condition:
+                   type: Ready
+                   status: "False"
+                   reason: DeploymentFailed
+                   message: "Failed to deploy Cloud Run service"
+             createEvents:
+               - target: CompositeAndClaim
+                 event:
+                   type: Warning
+                   reason: DeploymentFailed
+                   message: "Cloud Run service deployment failed"
+
+           # Success condition - Cloud Run service ready (placed LAST to override failures with force: true)
+           - matchers:
+               - resources:
+                   - name: "cloudrun-service"
+                 conditions:
+                   - type: Synced
+                     status: "True"
+                   - type: Ready
+                     status: "True"
+             setConditions:
+               - target: CompositeAndClaim
+                 force: true
+                 condition:
+                   type: Ready
+                   status: "True"
+                   reason: ServiceReady
+                   message: "Cloud Run service successfully deployed and ready"
+             createEvents:
+               - target: CompositeAndClaim
+                 event:
+                   type: Normal
+                   reason: ServiceReady
+                   message: "Cloud Run service successfully provisioned"
 
     - step: auto-ready
       functionRef:

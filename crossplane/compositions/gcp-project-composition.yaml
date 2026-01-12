@@ -242,71 +242,109 @@ spec:
         apiVersion: function-status-transformer.fn.crossplane.io/v1beta1
         kind: StatusTransformation
         statusConditionHooks:
-          # Project creation errors
-          - matchers:
-              - resources:
-                  - name: "project"
-                conditions:
-                  - type: Synced
-                    status: "False"
-                    reason: ReconcileError
-            setConditions:
-              - target: CompositeAndClaim
-                condition:
-                  type: Ready
-                  status: "False"
-                  reason: ProjectFailed
-                  message: "Failed to create GCP project"
-            createEvents:
-              - target: CompositeAndClaim
-                event:
-                  type: Warning
-                  reason: ProjectFailed
-                  message: "GCP project creation failed"
+           # Project creation errors
+           - matchers:
+               - resources:
+                   - name: "project"
+                 conditions:
+                   - type: Synced
+                     status: "False"
+                     reason: ReconcileError
+             setConditions:
+               - target: CompositeAndClaim
+                 condition:
+                   type: Ready
+                   status: "False"
+                   reason: ProjectFailed
+                   message: "Failed to create GCP project"
+             createEvents:
+               - target: CompositeAndClaim
+                 event:
+                   type: Warning
+                   reason: ProjectFailed
+                   message: "GCP project creation failed"
 
-          # SharedVPC linking errors
-          - matchers:
-              - resources:
-                  - name: "sharedvpc-service-project"
-                conditions:
-                  - type: Synced
-                    status: "False"
-                    reason: ReconcileError
-            setConditions:
-              - target: CompositeAndClaim
-                condition:
-                  type: Ready
-                  status: "False"
-                  reason: SharedVPCFailed
-                  message: "Failed to link to SharedVPC"
-            createEvents:
-              - target: CompositeAndClaim
-                event:
-                  type: Warning
-                  reason: SharedVPCFailed
-                  message: "SharedVPC link failed"
+           # SharedVPC linking errors
+           - matchers:
+               - resources:
+                   - name: "sharedvpc-service-project"
+                 conditions:
+                   - type: Synced
+                     status: "False"
+                     reason: ReconcileError
+             setConditions:
+               - target: CompositeAndClaim
+                 condition:
+                   type: Ready
+                   status: "False"
+                   reason: SharedVPCFailed
+                   message: "Failed to link to SharedVPC"
+             createEvents:
+               - target: CompositeAndClaim
+                 event:
+                   type: Warning
+                   reason: SharedVPCFailed
+                   message: "SharedVPC link failed"
 
-          # API enablement errors (generic for all APIs)
-          - matchers:
-              - resources:
-                  - name: ".*-api"
-                conditions:
-                  - type: Synced
-                    status: "False"
-                    reason: ReconcileError
-            setConditions:
-              - target: CompositeAndClaim
-                condition:
-                  type: Ready
-                  status: "False"
-                  reason: APIEnablementFailed
-                  message: "Failed to enable required GCP APIs"
-            createEvents:
-              - target: CompositeAndClaim
-                event:
-                  type: Warning
-                  reason: APIEnablementFailed
-                  message: "GCP API enablement failed"
+           # API enablement errors (generic for all APIs)
+           - matchers:
+               - resources:
+                   - name: ".*-api"
+                 conditions:
+                   - type: Synced
+                     status: "False"
+                     reason: ReconcileError
+             setConditions:
+               - target: CompositeAndClaim
+                 condition:
+                   type: Ready
+                   status: "False"
+                   reason: APIEnablementFailed
+                   message: "Failed to enable required GCP APIs"
+             createEvents:
+               - target: CompositeAndClaim
+                 event:
+                   type: Warning
+                   reason: APIEnablementFailed
+                   message: "GCP API enablement failed"
+
+           # Success condition - All resources synced and ready (placed LAST to override failures with force: true)
+           - matchers:
+               - resources:
+                   - name: "project"
+                 conditions:
+                   - type: Synced
+                     status: "True"
+                   - type: Ready
+                     status: "True"
+               - resources:
+                   - name: "sharedvpc-service-project"
+                 conditions:
+                   - type: Synced
+                     status: "True"
+                   - type: Ready
+                     status: "True"
+               - resources:
+                   - name: ".*-api"
+                 conditions:
+                   - type: Synced
+                     status: "True"
+                   - type: Ready
+                     status: "True"
+             setConditions:
+               - target: CompositeAndClaim
+                 force: true
+                 condition:
+                   type: Ready
+                   status: "True"
+                   reason: ProjectReady
+                   message: "GCP project fully provisioned with all APIs enabled"
+             createEvents:
+               - target: CompositeAndClaim
+                 event:
+                   type: Normal
+                   reason: ProjectReady
+                   message: "GCP project successfully created and configured"
 
     - step: auto-ready
       functionRef:
