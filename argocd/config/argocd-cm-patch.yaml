@@ -216,9 +216,3 @@ data:
         end
 
         return health_status
-    ignoreDifferences.all: |
-      jsonPointers:
-        - /spec/resourceRef
-        - /spec/claimRef
-        - /spec/compositeRef
-        - /metadata/finalizers
