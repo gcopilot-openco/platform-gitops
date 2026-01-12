@@ -74,6 +74,58 @@ data:
         end
 
         return health_status
+    "*.platform.openco.tech/*":
+      health.lua: |
+        health_status = {
+          status = "Progressing",
+          message = "Waiting for resource to be synced and ready..."
+        }
+
+        local function contains (table, val)
+          for i, v in ipairs(table) do
+            if v == val then
+              return true
+            end
+          end
+          return false
+        end
+
+        if obj.status == nil or obj.status.conditions == nil then
+          return health_status
+        end
+
+        local synced = false
+        local ready = false
+
+        for i, condition in ipairs(obj.status.conditions) do
+          if condition.type == "Synced" then
+            if condition.status == "False" then
+              health_status.status = "Degraded"
+              health_status.message = condition.message
+              return health_status
+            end
+            if condition.status == "True" then synced = true end
+          end
+
+          if condition.type == "Ready" then
+            if condition.status == "False" then
+              -- Check if there's a meaningful message
+              if condition.message ~= nil and condition.message ~= "" then
+                health_status.status = "Degraded"
+                health_status.message = condition.message
+                return health_status
+              end
+            end
+            if condition.status == "True" then ready = true end
+          end
+        end
+
+        if synced and ready then
+          health_status.status = "Healthy"
+          health_status.message = "Resource is healthy and synced."
+        end
+
+        return health_status
     "*.crossplane.io/*":
       health.lua: |
         health_status = {
