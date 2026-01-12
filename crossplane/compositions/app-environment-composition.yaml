@@ -112,6 +112,23 @@ spec:
                   type: Ready
                   status: "True"
 
+    - step: sequence-resources
+      functionRef:
+        name: function-sequencer
+      input:
+        apiVersion: sequencer.fn.crossplane.io/v1beta1
+        kind: Input
+        rules:
+          - sequence:
+              - gcp-project-xr
+              - gcp-artifact-xr
+          - sequence:
+              - gcp-project-xr
+              - gcp-secretmanager-xr
+          - sequence:
+              - gcp-project-xr
+              - gcp-cloudrun-xr
+
     - step: status-handler
       functionRef:
         name: function-status-transformer
