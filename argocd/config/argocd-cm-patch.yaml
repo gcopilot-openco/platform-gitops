@@ -170,7 +170,7 @@ data:
       health.lua: |
         health_status = {
           status = "Progressing",
-          message = "Waiting for resource to be synced and ready..."
+          message = "Provisioning ..."
         }
 
         local function contains (table, val)
@@ -190,69 +190,44 @@ data:
           "ProviderConfig",
           "ProviderConfigUsage"
         }
-
-        if (obj.status == nil or next(obj.status) == nil) and contains(has_no_status, obj.kind) then
+        if obj.status == nil or next(obj.status) == nil and contains(has_no_status, obj.kind) then
             health_status.status = "Healthy"
             health_status.message = "Resource is up-to-date."
           return health_status
         end
 
-        if obj.status == nil or obj.status.conditions == nil then
+        if obj.status == nil or next(obj.status) == nil or obj.status.conditions == nil then
+          if (obj.kind == "ProviderConfig" or obj.kind == "ClusterProviderConfig") and obj.status.users ~= nil then
+            health_status.status = "Healthy"
+            health_status.message = "Resource is in use."
+            return health_status
+          end
           return health_status
         end
 
-        local synced = false
-        local ready = false
-        local healthy = false
-        local installed = false
-
         for i, condition in ipairs(obj.status.conditions) do
+          if condition.type == "LastAsyncOperation" then
+            if condition.status == "False" then
+              health_status.status = "Degraded"
+              health_status.message = condition.message
+              return health_status
+            end
+          end
+
           if condition.type == "Synced" then
             if condition.status == "False" then
               health_status.status = "Degraded"
               health_status.message = condition.message
               return health_status
             end
-            if condition.status == "True" then synced = true end
           end
 
           if contains({"Ready", "Offered", "Established", "ValidPipeline", "RevisionHealthy"}, condition.type) then
-            if condition.status == "True" then ready = true end
-          end
-
-          if condition.type == "Healthy" then
-            if condition.status == "False" then
-              health_status.status = "Degraded"
-              health_status.message = condition.message
-              return health_status
+            if condition.status == "True" then
+              health_status.status = "Healthy"
+              health_status.message = "Resource is up-to-date."
             end
-            if condition.status == "True" then healthy = true end
           end
-
-          if condition.type == "Installed" then
-            if condition.status == "True" then installed = true end
-          end
-        end
-
-        -- Managed Resources / Compositions logic
-        if synced and ready then
-          health_status.status = "Healthy"
-          health_status.message = "Resource is healthy and synced."
-          return health_status
-        end
-
-        -- Providers / Packages logic
-        if healthy and installed then
-          health_status.status = "Healthy"
-          health_status.message = "Package is healthy and installed."
-          return health_status
-        end
-
-        -- Fallback for resources that only use Healthy (like some Functions)
-        if healthy and not synced and not ready and not installed then
-          health_status.status = "Healthy"
-          health_status.message = "Resource is healthy."
-          return health_status
         end
 
         return health_status
