@@ -74,21 +74,12 @@ data:
         end
 
         return health_status
-    "*.platform.openco.tech/*":
+    "platform.openco.tech/AppEnvironment":
       health.lua: |
         health_status = {
           status = "Progressing",
-          message = "Waiting for resource to be synced and ready..."
+          message = "Provisioning infrastructure..."
         }
-
-        local function contains (table, val)
-          for i, v in ipairs(table) do
-            if v == val then
-              return true
-            end
-          end
-          return false
-        end
 
         if obj.status == nil or obj.status.conditions == nil then
           return health_status
@@ -109,7 +100,6 @@ data:
 
           if condition.type == "Ready" then
             if condition.status == "False" then
-              -- Check if there's a meaningful message
               if condition.message ~= nil and condition.message ~= "" then
                 health_status.status = "Degraded"
                 health_status.message = condition.message
@@ -122,7 +112,57 @@ data:
 
         if synced and ready then
           health_status.status = "Healthy"
-          health_status.message = "Resource is healthy and synced."
+          health_status.message = "All infrastructure provisioned successfully."
+        end
+
+        return health_status
+    "platform.openco.tech/GCPProject":
+      health.lua: |
+        health_status = {
+          status = "Progressing",
+          message = "Provisioning GCP project..."
+        }
+
+        if obj.status == nil or obj.status.conditions == nil then
+          return health_status
+        end
+
+        for i, condition in ipairs(obj.status.conditions) do
+          if condition.type == "Synced" and condition.status == "False" then
+            health_status.status = "Degraded"
+            health_status.message = condition.message
+            return health_status
+          end
+          if condition.type == "Ready" and condition.status == "True" then
+            health_status.status = "Healthy"
+            health_status.message = "GCP project ready."
+            return health_status
+          end
+        end
+
+        return health_status
+    "platform.openco.tech/*":
+      health.lua: |
+        health_status = {
+          status = "Progressing",
+          message = "Provisioning..."
+        }
+
+        if obj.status == nil or obj.status.conditions == nil then
+          return health_status
+        end
+
+        for i, condition in ipairs(obj.status.conditions) do
+          if condition.type == "Synced" and condition.status == "False" then
+            health_status.status = "Degraded"
+            health_status.message = condition.message
+            return health_status
+          end
+          if condition.type == "Ready" and condition.status == "True" then
+            health_status.status = "Healthy"
+            health_status.message = "Resource ready."
+            return health_status
+          end
         end
 
         return health_status
