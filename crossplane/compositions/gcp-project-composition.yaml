@@ -66,6 +66,8 @@ spec:
               - type: ToCompositeFieldPath
                 fromFieldPath: status.atProvider.number
                 toFieldPath: status.projectNumber
+              - fromFieldPath: spec.deletionPolicy
+                toFieldPath: spec.forProvider.deletionPolicy
 
           - name: sharedvpc-service-project
             base:
