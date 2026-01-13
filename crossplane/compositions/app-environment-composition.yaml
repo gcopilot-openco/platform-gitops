@@ -136,12 +136,12 @@ spec:
         apiVersion: function-status-transformer.fn.crossplane.io/v1beta1
         kind: StatusTransformation
         statusConditionHooks:
-            # 1. GCPProject with error in Ready condition - Extract and pass upstream
+            # 1. GCPProject with error in Developer condition - Extract and pass upstream
             - matchers:
                 - resources:
                     - name: "gcp-project-xr"
                   conditions:
-                    - type: Ready
+                    - type: Developer
                       status: "False"
                       message: "(?P<ErrorMsg>.*)"
               setConditions:
@@ -182,13 +182,13 @@ spec:
                     reason: InfrastructureFailed
                     message: "Infrastructure provisioning failed"
 
-            # 3. Default: Provisioning in progress (when GCPProject is Synced but not Ready)
+            # 3. Default: Provisioning in progress (when GCPProject Developer condition doesn't exist yet)
             - matchers:
                 - resources:
                     - name: "gcp-project-xr"
                   conditions:
-                    - type: Synced
-                      status: "True"
+                    - type: Developer
+                      status: "Unknown"
               setConditions:
                 - target: CompositeAndClaim
                   condition:
