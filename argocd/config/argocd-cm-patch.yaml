@@ -74,156 +74,65 @@ data:
         end
 
         return health_status
-    "platform.openco.tech/AppEnvironment":
-      health.lua: |
-        health_status = {
-          status = "Progressing",
-          message = "Provisioning infrastructure..."
-        }
-
-        if obj.status == nil or obj.status.conditions == nil then
-          return health_status
-        end
-
-        local synced = false
-        local ready = false
-        local developer_status = nil
-        local developer_message = nil
-        local ready_message = nil
-
-        -- First pass: collect all condition states
-        for i, condition in ipairs(obj.status.conditions) do
-          if condition.type == "Developer" then
-            developer_status = condition.status
-            if condition.message ~= nil and condition.message ~= "" then
-              developer_message = condition.message
-            end
-          end
-
-          if condition.type == "Synced" then
-            if condition.status == "False" then
-              health_status.status = "Degraded"
-              health_status.message = condition.message
-              return health_status
-            end
-            if condition.status == "True" then synced = true end
-          end
-
-          if condition.type == "Ready" then
-            if condition.status == "True" then 
-              ready = true 
-            elseif condition.status == "False" and condition.message ~= nil and condition.message ~= "" then
-              ready_message = condition.message
-            end
-          end
-        end
-
-        -- Priority order: Developer condition > Synced > Ready
-        if developer_status == "False" then
-          health_status.status = "Degraded"
-          health_status.message = developer_message or "Application environment provisioning failed"
-          return health_status
-        end
-
-        if synced and ready then
-          health_status.status = "Healthy"
-          health_status.message = "All infrastructure provisioned successfully."
-        elseif developer_message ~= nil then
-          -- Use Developer message if available during provisioning
-          health_status.message = developer_message
-        elseif ready_message ~= nil then
-          -- Fallback to Ready message if no Developer message
-          health_status.status = "Degraded"
-          health_status.message = ready_message
-        end
-
-        return health_status
-    "platform.openco.tech/GCPProject":
-      health.lua: |
-        health_status = {
-          status = "Progressing",
-          message = "Provisioning GCP project..."
-        }
-
-        if obj.status == nil or obj.status.conditions == nil then
-          return health_status
-        end
-
-        local synced = false
-        local ready = false
-        local developer_status = nil
-        local developer_message = nil
-        local ready_message = nil
-
-        -- First pass: collect all condition states
-        for i, condition in ipairs(obj.status.conditions) do
-          if condition.type == "Developer" then
-            developer_status = condition.status
-            if condition.message ~= nil and condition.message ~= "" then
-              developer_message = condition.message
-            end
-          end
-
-          if condition.type == "Synced" then
-            if condition.status == "False" then
-              health_status.status = "Degraded"
-              health_status.message = condition.message
-              return health_status
-            end
-            if condition.status == "True" then synced = true end
-          end
-
-          if condition.type == "Ready" then
-            if condition.status == "True" then 
-              ready = true 
-            elseif condition.status == "False" and condition.message ~= nil and condition.message ~= "" then
-              ready_message = condition.message
-            end
-          end
-        end
-
-        -- Priority order: Developer condition > Synced > Ready
-        if developer_status == "False" then
-          health_status.status = "Degraded"
-          health_status.message = developer_message or "GCP project provisioning failed"
-          return health_status
-        end
-
-        if synced and ready then
-          health_status.status = "Healthy"
-          health_status.message = "GCP project fully provisioned."
-        elseif developer_message ~= nil then
-          -- Use Developer message if available during provisioning
-          health_status.message = developer_message
-        elseif ready_message ~= nil then
-          -- Fallback to Ready message if no Developer message
-          health_status.status = "Degraded"
-          health_status.message = ready_message
-        end
-
-        return health_status
     "platform.openco.tech/*":
       health.lua: |
         health_status = {
           status = "Progressing",
-          message = "Provisioning..."
+          message = "Provisioning " .. obj.kind .. "..."
         }
 
         if obj.status == nil or obj.status.conditions == nil then
           return health_status
         end
 
+        local synced = false
+        local ready = false
+        local developer_status = nil
+        local developer_message = nil
+        local ready_message = nil
+
+        -- Collect all condition states
         for i, condition in ipairs(obj.status.conditions) do
-          if condition.type == "Synced" and condition.status == "False" then
-            health_status.status = "Degraded"
-            health_status.message = condition.message
-            return health_status
+          if condition.type == "Developer" then
+            developer_status = condition.status
+            if condition.message ~= nil and condition.message ~= "" then
+              developer_message = condition.message
+            end
           end
-          if condition.type == "Ready" and condition.status == "True" then
-            health_status.status = "Healthy"
-            health_status.message = "Resource ready."
-            return health_status
+
+          if condition.type == "Synced" then
+            if condition.status == "False" then
+              health_status.status = "Degraded"
+              health_status.message = condition.message
+              return health_status
+            end
+            if condition.status == "True" then synced = true end
           end
+
+          if condition.type == "Ready" then
+            if condition.status == "True" then 
+              ready = true 
+            elseif condition.status == "False" and condition.message ~= nil and condition.message ~= "" then
+              ready_message = condition.message
+            end
+          end
+        end
+
+        -- Priority: Developer > Synced > Ready
+        if developer_status == "False" then
+          health_status.status = "Degraded"
+          health_status.message = developer_message or (obj.kind .. " provisioning failed")
+          return health_status
+        end
+
+        if synced and ready then
+          health_status.status = "Healthy"
+          health_status.message = obj.kind .. " ready."
+        elseif developer_message ~= nil then
+          health_status.message = developer_message
+        elseif ready_message ~= nil then
+          health_status.status = "Degraded"
+          health_status.message = ready_message
         end
 
         return health_status
