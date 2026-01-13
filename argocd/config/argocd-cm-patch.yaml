@@ -143,26 +143,50 @@ data:
           return health_status
         end
 
+        local synced = false
+        local ready = false
+        local developer_message = nil
+
         for i, condition in ipairs(obj.status.conditions) do
-          if condition.type == "Synced" and condition.status == "False" then
-            health_status.status = "Degraded"
-            health_status.message = condition.message
-            return health_status
-          end
-          if condition.type == "Ready" and condition.status == "False" then
-            health_status.status = "Degraded"
+          -- Capture Developer condition message for detailed feedback
+          if condition.type == "Developer" then
             if condition.message ~= nil and condition.message ~= "" then
-              health_status.message = condition.message
-            else
-              health_status.message = "GCP project provisioning failed"
+              developer_message = condition.message
             end
-            return health_status
+            if condition.status == "False" then
+              health_status.status = "Degraded"
+              health_status.message = condition.message or "GCP project provisioning failed"
+              return health_status
+            end
           end
-          if condition.type == "Ready" and condition.status == "True" then
-            health_status.status = "Healthy"
-            health_status.message = "GCP project ready."
-            return health_status
+
+          if condition.type == "Synced" then
+            if condition.status == "False" then
+              health_status.status = "Degraded"
+              health_status.message = condition.message
+              return health_status
+            end
+            if condition.status == "True" then synced = true end
           end
+
+          if condition.type == "Ready" then
+            if condition.status == "False" then
+              if condition.message ~= nil and condition.message ~= "" then
+                health_status.status = "Degraded"
+                health_status.message = condition.message
+                return health_status
+              end
+            end
+            if condition.status == "True" then ready = true end
+          end
+        end
+
+        if synced and ready then
+          health_status.status = "Healthy"
+          health_status.message = "GCP project fully provisioned."
+        elseif developer_message ~= nil then
+          -- Use Developer message if available during provisioning
+          health_status.message = developer_message
         end
 
         return health_status
