@@ -257,7 +257,7 @@ spec:
               - target: CompositeAndClaim
                 force: true
                 condition:
-                  type: Ready
+                  type: Developer
                   status: "False"
                   reason: ProjectFailed
                   message: "GCP Project creation failed: {{ .ErrorMsg }}"
@@ -281,7 +281,7 @@ spec:
               - target: CompositeAndClaim
                 force: true
                 condition:
-                  type: Ready
+                  type: Developer
                   status: "False"
                   reason: SharedVPCFailed
                   message: "SharedVPC linking failed: {{ .ErrorMsg }}"
@@ -305,7 +305,7 @@ spec:
               - target: CompositeAndClaim
                 force: true
                 condition:
-                  type: Ready
+                  type: Developer
                   status: "False"
                   reason: APIEnablementFailed
                   message: "GCP API enablement failed: {{ .ErrorMsg }}"
@@ -341,9 +341,9 @@ spec:
                     status: "True"
             setConditions:
               - target: CompositeAndClaim
-                force: true
+                force: false
                 condition:
-                  type: Ready
+                  type: Developer
                   status: "True"
                   reason: ProjectReady
                   message: "GCP project fully provisioned with all APIs enabled"
