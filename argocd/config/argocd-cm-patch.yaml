@@ -87,8 +87,21 @@ data:
 
         local synced = false
         local ready = false
+        local developer_message = nil
 
         for i, condition in ipairs(obj.status.conditions) do
+          -- Capture Developer condition message for detailed feedback
+          if condition.type == "Developer" then
+            if condition.message ~= nil and condition.message ~= "" then
+              developer_message = condition.message
+            end
+            if condition.status == "False" then
+              health_status.status = "Degraded"
+              health_status.message = condition.message or "Application environment provisioning failed"
+              return health_status
+            end
+          end
+
           if condition.type == "Synced" then
             if condition.status == "False" then
               health_status.status = "Degraded"
@@ -113,6 +126,9 @@ data:
         if synced and ready then
           health_status.status = "Healthy"
           health_status.message = "All infrastructure provisioned successfully."
+        elseif developer_message ~= nil then
+          -- Use Developer message if available during provisioning
+          health_status.message = developer_message
         end
 
         return health_status
