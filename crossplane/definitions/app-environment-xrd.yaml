@@ -135,6 +135,10 @@ spec:
         - name: CLOUD-RUN
           type: string
           jsonPath: .status.cloudRunUrl
+        - name: MESSAGE
+          type: string
+          priority: 1
+          jsonPath: .status.conditions[?(@.type=='Ready')].message
         - name: AGE
           type: date
           jsonPath: .metadata.creationTimestamp

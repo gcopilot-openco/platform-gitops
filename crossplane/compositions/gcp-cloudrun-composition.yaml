@@ -67,7 +67,7 @@ spec:
                     convert:
                       toType: string
               - type: ToCompositeFieldPath
-                fromFieldPath: status.atProvider.uri
+                fromFieldPath: status.atProvider.status[0].url
                 toFieldPath: status.serviceUrl
 
     - step: status-handler

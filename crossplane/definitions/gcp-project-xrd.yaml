@@ -58,3 +58,20 @@ spec:
                   description: Human-readable status message including any errors
                 ready:
                   type: boolean
+      additionalPrinterColumns:
+        - name: READY
+          type: string
+          jsonPath: .status.conditions[?(@.type=='Ready')].status
+        - name: SYNCED
+          type: string
+          jsonPath: .status.conditions[?(@.type=='Synced')].status
+        - name: PROJECT-ID
+          type: string
+          jsonPath: .status.projectId
+        - name: MESSAGE
+          type: string
+          priority: 1
+          jsonPath: .status.conditions[?(@.type=='Ready')].message
+        - name: AGE
+          type: date
+          jsonPath: .metadata.creationTimestamp
