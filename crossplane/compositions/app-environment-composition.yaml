@@ -136,7 +136,53 @@ spec:
         apiVersion: function-status-transformer.fn.crossplane.io/v1beta1
         kind: StatusTransformation
         statusConditionHooks:
-            # 1. Default: Provisioning in progress
+            # 1. GCPProject with error in Ready condition - Extract and pass upstream
+            - matchers:
+                - resources:
+                    - name: "gcp-project-xr"
+                  conditions:
+                    - type: Ready
+                      status: "False"
+                      message: "(?P<ErrorMsg>.*)"
+              setConditions:
+                - target: CompositeAndClaim
+                  force: true
+                  condition:
+                    type: Developer
+                    status: "False"
+                    reason: InfrastructureFailed
+                    message: "{{ .ErrorMsg }}"
+              createEvents:
+                - target: CompositeAndClaim
+                  event:
+                    type: Warning
+                    reason: InfrastructureFailed
+                    message: "Infrastructure provisioning failed"
+
+            # 2. GCPProject ProviderConfig error in Synced condition (catches early failures)
+            - matchers:
+                - resources:
+                    - name: "gcp-project-xr"
+                  conditions:
+                    - type: Synced
+                      status: "False"
+                      reason: ReconcileError
+                      message: "(?P<ErrorMsg>.*)"
+              setConditions:
+                - target: CompositeAndClaim
+                  condition:
+                    type: Developer
+                    status: "False"
+                    reason: InfrastructureFailed
+                    message: "{{ .ErrorMsg }}"
+              createEvents:
+                - target: CompositeAndClaim
+                  event:
+                    type: Warning
+                    reason: InfrastructureFailed
+                    message: "Infrastructure provisioning failed"
+
+            # 3. Default: Provisioning in progress (when GCPProject is Synced but not Ready)
             - matchers:
                 - resources:
                     - name: "gcp-project-xr"
@@ -149,123 +195,6 @@ spec:
                     type: Developer
                     status: "True"
                     message: "Provisioning infrastructure..."
-
-            # 2. GCPProject - ProviderConfig missing (service owner action required)
-            - matchers:
-                - resources:
-                    - name: "gcp-project-xr"
-                  conditions:
-                    - type: Synced
-                      status: "False"
-                      reason: ReconcileError
-                      message: "(.*)cannot get referenced ProviderConfig(.*)"
-              setConditions:
-                - target: CompositeAndClaim
-                  force: true
-                  condition:
-                    type: Developer
-                    status: "False"
-                    reason: ProviderConfigMissing
-                    message: "GCP provider is not configured. Contact platform team."
-              createEvents:
-                - target: CompositeAndClaim
-                  event:
-                    type: Warning
-                    reason: ProviderConfigMissing
-                    message: "GCP provider configuration missing - contact platform team"
-
-            # 3. GCPProject - Invalid region/location (user action required)
-            - matchers:
-                - resources:
-                    - name: "gcp-project-xr"
-                  conditions:
-                    - type: Synced
-                      status: "False"
-                      reason: ReconcileError
-                      message: "(.*)location '(?P<Region>.*)' is invalid(.*)"
-              setConditions:
-                - target: CompositeAndClaim
-                  force: true
-                  condition:
-                    type: Developer
-                    status: "False"
-                    reason: InvalidRegion
-                    message: "Region '{{ .Region }}' is not available. Check spec.region value."
-              createEvents:
-                - target: CompositeAndClaim
-                  event:
-                    type: Warning
-                    reason: InvalidRegion
-                    message: "Invalid region specified - check your region configuration"
-
-            # 4. GCPProject - Permission denied (service owner action required)
-            - matchers:
-                - resources:
-                    - name: "gcp-project-xr"
-                  conditions:
-                    - type: Synced
-                      status: "False"
-                      reason: ReconcileError
-                      message: "(.*)permission denied(.*)|(.*)[Pp]ermission(.*)denied(.*)"
-              setConditions:
-                - target: CompositeAndClaim
-                  force: true
-                  condition:
-                    type: Developer
-                    status: "False"
-                    reason: PermissionDenied
-                    message: "Insufficient permissions to create resources. Contact platform team."
-              createEvents:
-                - target: CompositeAndClaim
-                  event:
-                    type: Warning
-                    reason: PermissionDenied
-                    message: "Permission denied creating infrastructure - contact platform team"
-
-            # 5. GCPProject - Resource already exists (user action required)
-            - matchers:
-                - resources:
-                    - name: "gcp-project-xr"
-                  conditions:
-                    - type: Synced
-                      status: "False"
-                      reason: ReconcileError
-                      message: "(.*)[Aa]lready [Ee]xists(.*)"
-              setConditions:
-                - target: CompositeAndClaim
-                  force: true
-                  condition:
-                    type: Developer
-                    status: "False"
-                    reason: AlreadyExists
-                    message: "A resource with this name already exists. Check spec.appName value."
-              createEvents:
-                - target: CompositeAndClaim
-                  event:
-                    type: Warning
-                    reason: AlreadyExists
-                    message: "Resource already exists - choose a different name"
-
-            # 6. GCPProject - Generic Synced=False (service owner action required)
-            - matchers:
-                - resources:
-                    - name: "gcp-project-xr"
-                  conditions:
-                    - type: Synced
-                      status: "False"
-              setConditions:
-                - target: CompositeAndClaim
-                  condition:
-                    type: Developer
-                    status: "False"
-                    reason: SyncFailed
-                    message: "GCP Project provisioning failed. Contact platform team for assistance."
-              createEvents:
-                - target: CompositeAndClaim
-                  event:
-                    type: Warning
-                    reason: SyncFailed
-                    message: "GCP Project sync failed"
 
             # 7. GCPArtifact - Any failure
             - matchers:

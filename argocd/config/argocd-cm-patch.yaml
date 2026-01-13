@@ -149,6 +149,15 @@ data:
             health_status.message = condition.message
             return health_status
           end
+          if condition.type == "Ready" and condition.status == "False" then
+            health_status.status = "Degraded"
+            if condition.message ~= nil and condition.message ~= "" then
+              health_status.message = condition.message
+            else
+              health_status.message = "GCP project provisioning failed"
+            end
+            return health_status
+          end
           if condition.type == "Ready" and condition.status == "True" then
             health_status.status = "Healthy"
             health_status.message = "GCP project ready."
