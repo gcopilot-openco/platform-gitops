@@ -237,6 +237,25 @@ spec:
                     fmt: 'secretmanager-api-%s'
                 toFieldPath: metadata.name
 
+    - step: sequence-resources
+      functionRef:
+        name: function-sequencer
+      input:
+        apiVersion: sequencer.fn.crossplane.io/v1beta1
+        kind: Input
+        rules:
+          # All *-api resources must wait for project to be ready
+          - sequence:
+              - project
+              - .*-api
+          # SharedVPC requires both project and compute-api
+          - sequence:
+              - project
+              - sharedvpc-service-project
+          - sequence:
+              - compute-api
+              - sharedvpc-service-project
+
     - step: status-handler
       functionRef:
         name: function-status-transformer
