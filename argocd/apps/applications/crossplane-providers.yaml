@@ -8,6 +8,17 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  info:
+    - name: 'Purpose'
+      value: 'Installs Crossplane provider packages and configurations'
+    - name: 'Resources'
+      value: 'Provider (GCP, Kubernetes), ProviderConfig, function packages'
+    - name: 'Target Namespace'
+      value: 'crossplane-system'
+    - name: 'Sync Wave'
+      value: '1 - Foundation layer (deploys first)'
+    - name: 'Source Path'
+      value: 'crossplane/providers'
   project: default
   source:
     repoURL: https://github.com/gcopilot-openco/platform-gitops.git

@@ -6,6 +6,17 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  info:
+    - name: 'Purpose'
+      value: 'App-of-Apps root managing all platform infrastructure applications'
+    - name: 'Pattern'
+      value: 'Declarative application bootstrapping (App-of-Apps)'
+    - name: 'Manages'
+      value: 'Crossplane providers, definitions, compositions, and app instances'
+    - name: 'Source Path'
+      value: 'argocd/apps/applications'
+    - name: 'Deployment Order'
+      value: 'Automatically syncs child apps in wave order (1-4)'
   project: default
   source:
     repoURL: https://github.com/gcopilot-openco/platform-gitops.git

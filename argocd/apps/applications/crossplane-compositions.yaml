@@ -8,6 +8,17 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  info:
+    - name: 'Purpose'
+      value: 'Defines custom platform APIs (XRDs) for self-service infrastructure'
+    - name: 'Resources'
+      value: 'XRDs: AppEnvironment, GCPProject, GCPCloudRun, GCPArtifact, etc.'
+    - name: 'Target Namespace'
+      value: 'crossplane-system'
+    - name: 'Sync Wave'
+      value: '2 - API definitions (after providers)'
+    - name: 'Source Path'
+      value: 'crossplane/definitions'
   project: default
   source:
     repoURL: https://github.com/gcopilot-openco/platform-gitops.git
@@ -34,6 +45,17 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  info:
+    - name: 'Purpose'
+      value: 'Implements platform API logic via Crossplane compositions'
+    - name: 'Resources'
+      value: 'Compositions: Pipeline mode with patch-and-transform + auto-ready'
+    - name: 'Target Namespace'
+      value: 'crossplane-system'
+    - name: 'Sync Wave'
+      value: '3 - Implementation layer (after definitions)'
+    - name: 'Source Path'
+      value: 'crossplane/compositions'
   project: default
   source:
     repoURL: https://github.com/gcopilot-openco/platform-gitops.git

@@ -8,6 +8,19 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  info:
+    - name: 'Purpose'
+      value: 'Deploys application environment instances (Composite Resource claims)'
+    - name: 'Resources'
+      value: 'AppEnvironment XRs: GCP projects, Cloud Run services, Artifact Registries'
+    - name: 'Target Namespace'
+      value: 'argocd'
+    - name: 'Sync Wave'
+      value: '4 - Application instances (after platform is ready)'
+    - name: 'Source Path'
+      value: 'crossplane/composites/examples'
+    - name: 'Environments'
+      value: 'sandbox, hml, prod'
   project: default
   source:
     repoURL: https://github.com/gcopilot-openco/platform-gitops.git
