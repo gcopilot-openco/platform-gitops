@@ -9,7 +9,7 @@ spec:
   # Using an appName that will exceed GCP's 30-character project ID limit
   # Project ID will be: prj-hml-this-is-a-very-long-application-name-that-exceeds-limits (64+ chars)
   # This will trigger a GCP API error: "project ID must be between 6 and 30 characters"
-  appName: this-is-a-very-long-application-name-that-exceeds-limits
+  appName: testv6
   environment: hml
   teamId: platform
   costCenter: CC-TEST-API-ERROR

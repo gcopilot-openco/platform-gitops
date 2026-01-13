@@ -87,18 +87,16 @@ data:
 
         local synced = false
         local ready = false
+        local developer_status = nil
         local developer_message = nil
+        local ready_message = nil
 
+        -- First pass: collect all condition states
         for i, condition in ipairs(obj.status.conditions) do
-          -- Capture Developer condition message for detailed feedback
           if condition.type == "Developer" then
+            developer_status = condition.status
             if condition.message ~= nil and condition.message ~= "" then
               developer_message = condition.message
-            end
-            if condition.status == "False" then
-              health_status.status = "Degraded"
-              health_status.message = condition.message or "Application environment provisioning failed"
-              return health_status
             end
           end
 
@@ -112,15 +110,19 @@ data:
           end
 
           if condition.type == "Ready" then
-            if condition.status == "False" then
-              if condition.message ~= nil and condition.message ~= "" then
-                health_status.status = "Degraded"
-                health_status.message = condition.message
-                return health_status
-              end
+            if condition.status == "True" then 
+              ready = true 
+            elseif condition.status == "False" and condition.message ~= nil and condition.message ~= "" then
+              ready_message = condition.message
             end
-            if condition.status == "True" then ready = true end
           end
+        end
+
+        -- Priority order: Developer condition > Synced > Ready
+        if developer_status == "False" then
+          health_status.status = "Degraded"
+          health_status.message = developer_message or "Application environment provisioning failed"
+          return health_status
         end
 
         if synced and ready then
@@ -129,6 +131,10 @@ data:
         elseif developer_message ~= nil then
           -- Use Developer message if available during provisioning
           health_status.message = developer_message
+        elseif ready_message ~= nil then
+          -- Fallback to Ready message if no Developer message
+          health_status.status = "Degraded"
+          health_status.message = ready_message
         end
 
         return health_status
@@ -145,18 +151,16 @@ data:
 
         local synced = false
         local ready = false
+        local developer_status = nil
         local developer_message = nil
+        local ready_message = nil
 
+        -- First pass: collect all condition states
         for i, condition in ipairs(obj.status.conditions) do
-          -- Capture Developer condition message for detailed feedback
           if condition.type == "Developer" then
+            developer_status = condition.status
             if condition.message ~= nil and condition.message ~= "" then
               developer_message = condition.message
-            end
-            if condition.status == "False" then
-              health_status.status = "Degraded"
-              health_status.message = condition.message or "GCP project provisioning failed"
-              return health_status
             end
           end
 
@@ -170,15 +174,19 @@ data:
           end
 
           if condition.type == "Ready" then
-            if condition.status == "False" then
-              if condition.message ~= nil and condition.message ~= "" then
-                health_status.status = "Degraded"
-                health_status.message = condition.message
-                return health_status
-              end
+            if condition.status == "True" then 
+              ready = true 
+            elseif condition.status == "False" and condition.message ~= nil and condition.message ~= "" then
+              ready_message = condition.message
             end
-            if condition.status == "True" then ready = true end
           end
+        end
+
+        -- Priority order: Developer condition > Synced > Ready
+        if developer_status == "False" then
+          health_status.status = "Degraded"
+          health_status.message = developer_message or "GCP project provisioning failed"
+          return health_status
         end
 
         if synced and ready then
@@ -187,6 +195,10 @@ data:
         elseif developer_message ~= nil then
           -- Use Developer message if available during provisioning
           health_status.message = developer_message
+        elseif ready_message ~= nil then
+          -- Fallback to Ready message if no Developer message
+          health_status.status = "Degraded"
+          health_status.message = ready_message
         end
 
         return health_status
