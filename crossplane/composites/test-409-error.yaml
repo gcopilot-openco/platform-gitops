@@ -1,0 +1,14 @@
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: test-409-validation
+  namespace: sre
+  annotations:
+    description: "Test to validate 409 error propagation from managed resource to AppEnvironment Developer condition"
+spec:
+  # Using the SAME appName and environment as test-error-prop to trigger 409 error
+  # This will create a GCP Project with ID: prj-hml-error-test (which already exists)
+  appName: error-test
+  environment: hml
+  teamId: platform
+  costCenter: CC-TEST-409
