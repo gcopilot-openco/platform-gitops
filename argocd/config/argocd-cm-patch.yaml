@@ -31,11 +31,21 @@ data:
           "ProviderConfigUsage"
         }
 
-        -- Only mark as Healthy if it's a known 'no status' kind and status is empty
-        if (obj.status == nil or next(obj.status) == nil) and contains(has_no_status, obj.kind) then
-          health_status.status = "Healthy"
-          health_status.message = "Resource is up-to-date."
-          return health_status
+        -- Mark as Healthy if it's a known 'no status' kind
+        -- ClusterProviderConfig/ProviderConfig don't have Synced/Ready conditions
+        -- They either have empty status or just a 'users' count field
+        if contains(has_no_status, obj.kind) then
+          if obj.status == nil or next(obj.status) == nil then
+            health_status.status = "Healthy"
+            health_status.message = "Resource is up-to-date."
+            return health_status
+          end
+          -- ClusterProviderConfig has 'users' field when in use - this is healthy
+          if obj.status.users ~= nil then
+            health_status.status = "Healthy"
+            health_status.message = "Resource is up-to-date and in use."
+            return health_status
+          end
         end
 
         if obj.status == nil or obj.status.conditions == nil then
