@@ -24,8 +24,10 @@ spec:
   project: default
   source:
     repoURL: https://github.com/gcopilot-openco/platform-gitops.git
-    targetRevision: main
-    path: crossplane/composites/examples/*
+    targetRevision: HEAD
+    directory:
+      recurse: true
+    path: crossplane/composites/examples
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
