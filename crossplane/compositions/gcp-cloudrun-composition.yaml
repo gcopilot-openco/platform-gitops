@@ -77,7 +77,7 @@ spec:
         apiVersion: function-status-transformer.fn.crossplane.io/v1beta1
         kind: StatusTransformation
         statusConditionHooks:
-           # Cloud Run service deployment errors
+           # Cloud Run service deployment errors - Extract and pass upstream
            - matchers:
                - resources:
                    - name: "cloudrun-service"
@@ -85,13 +85,15 @@ spec:
                    - type: Synced
                      status: "False"
                      reason: ReconcileError
+                     message: "(?P<ErrorMsg>.*)"
              setConditions:
                - target: CompositeAndClaim
+                 force: true
                  condition:
-                   type: Ready
+                   type: Developer
                    status: "False"
                    reason: DeploymentFailed
-                   message: "Failed to deploy Cloud Run service"
+                   message: "Cloud Run deployment failed: {{ .ErrorMsg }}"
              createEvents:
                - target: CompositeAndClaim
                  event:
@@ -99,7 +101,7 @@ spec:
                    reason: DeploymentFailed
                    message: "Cloud Run service deployment failed"
 
-           # Success condition - Cloud Run service ready (placed LAST to override failures with force: true)
+           # Success condition - Cloud Run service ready
            - matchers:
                - resources:
                    - name: "cloudrun-service"
@@ -110,9 +112,9 @@ spec:
                      status: "True"
              setConditions:
                - target: CompositeAndClaim
-                 force: true
+                 force: false
                  condition:
-                   type: Ready
+                   type: Developer
                    status: "True"
                    reason: ServiceReady
                    message: "Cloud Run service successfully deployed and ready"

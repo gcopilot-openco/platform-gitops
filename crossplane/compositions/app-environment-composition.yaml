@@ -38,6 +38,29 @@ spec:
                   type: Ready
                   status: "True"
 
+          # 2. Create GCPIdentity XR
+          - name: gcp-identity-xr
+            base:
+              apiVersion: platform.openco.tech/v1alpha1
+              kind: GCPIdentity
+            patches:
+              - fromFieldPath: spec.appName
+                toFieldPath: spec.appName
+              - fromFieldPath: spec.teamId
+                toFieldPath: spec.teamId
+              - fromFieldPath: spec.environment
+                toFieldPath: spec.environment
+              - fromFieldPath: status.projectId
+                toFieldPath: spec.projectId
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.serviceAccountEmail
+                toFieldPath: status.serviceAccountEmail
+            readinessChecks:
+              - type: MatchCondition
+                matchCondition:
+                  type: Ready
+                  status: "True"
+
           # 3. Create GCPArtifact XR
           - name: gcp-artifact-xr
             base:
@@ -121,12 +144,15 @@ spec:
         rules:
           - sequence:
               - gcp-project-xr
+              - gcp-identity-xr
+          - sequence:
+              - gcp-project-xr
               - gcp-artifact-xr
           - sequence:
               - gcp-project-xr
               - gcp-secretmanager-xr
           - sequence:
-              - gcp-project-xr
+              - gcp-identity-xr
               - gcp-cloudrun-xr
 
     - step: status-handler
@@ -196,7 +222,76 @@ spec:
                     status: "True"
                     message: "Provisioning infrastructure..."
 
-            # 7. GCPArtifact - Any failure
+            # 4. GCPIdentity with error in Developer condition
+            - matchers:
+                - resources:
+                    - name: "gcp-identity-xr"
+                  conditions:
+                    - type: Developer
+                      status: "False"
+                      message: "(?P<ErrorMsg>.*)"
+              setConditions:
+                - target: CompositeAndClaim
+                  force: true
+                  condition:
+                    type: Developer
+                    status: "False"
+                    reason: IdentityFailed
+                    message: "{{ .ErrorMsg }}"
+              createEvents:
+                - target: CompositeAndClaim
+                  event:
+                    type: Warning
+                    reason: IdentityFailed
+                    message: "Identity provisioning failed"
+
+            # 5. GCPIdentity ProviderConfig error in Synced condition
+            - matchers:
+                - resources:
+                    - name: "gcp-identity-xr"
+                  conditions:
+                    - type: Synced
+                      status: "False"
+                      reason: ReconcileError
+                      message: "(?P<ErrorMsg>.*)"
+              setConditions:
+                - target: CompositeAndClaim
+                  condition:
+                    type: Developer
+                    status: "False"
+                    reason: IdentityFailed
+                    message: "{{ .ErrorMsg }}"
+              createEvents:
+                - target: CompositeAndClaim
+                  event:
+                    type: Warning
+                    reason: IdentityFailed
+                    message: "Identity provisioning failed"
+
+            # 7. GCPArtifact - Developer condition failure with message extraction
+            - matchers:
+                - resources:
+                    - name: "gcp-artifact-xr"
+                  conditions:
+                    - type: Developer
+                      status: "False"
+                      message: "(?P<ErrorMsg>.*)"
+              setConditions:
+                - target: CompositeAndClaim
+                  force: true
+                  condition:
+                    type: Developer
+                    status: "False"
+                    reason: ArtifactFailed
+                    message: "{{ .ErrorMsg }}"
+              createEvents:
+                - target: CompositeAndClaim
+                  event:
+                    type: Warning
+                    reason: ArtifactFailed
+                    message: "Artifact Registry failed"
+
+            # 8. GCPArtifact - Any Synced/Ready failure (fallback)
             - matchers:
                 - resources:
                     - name: "gcp-artifact-xr"
@@ -221,7 +316,30 @@ spec:
                     reason: ArtifactFailed
                     message: "Artifact Registry failed"
 
-            # 8. GCPSecretManager - Any failure
+            # 9. GCPSecretManager - Developer condition failure with message extraction
+            - matchers:
+                - resources:
+                    - name: "gcp-secretmanager-xr"
+                  conditions:
+                    - type: Developer
+                      status: "False"
+                      message: "(?P<ErrorMsg>.*)"
+              setConditions:
+                - target: CompositeAndClaim
+                  force: true
+                  condition:
+                    type: Developer
+                    status: "False"
+                    reason: SecretManagerFailed
+                    message: "{{ .ErrorMsg }}"
+              createEvents:
+                - target: CompositeAndClaim
+                  event:
+                    type: Warning
+                    reason: SecretManagerFailed
+                    message: "Secret Manager failed"
+
+            # 10. GCPSecretManager - Any Synced/Ready failure (fallback)
             - matchers:
                 - resources:
                     - name: "gcp-secretmanager-xr"
@@ -246,7 +364,30 @@ spec:
                     reason: SecretManagerFailed
                     message: "Secret Manager failed"
 
-            # 9. GCPCloudRun - Any failure
+            # 11. GCPCloudRun - Developer condition failure with message extraction
+            - matchers:
+                - resources:
+                    - name: "gcp-cloudrun-xr"
+                  conditions:
+                    - type: Developer
+                      status: "False"
+                      message: "(?P<ErrorMsg>.*)"
+              setConditions:
+                - target: CompositeAndClaim
+                  force: true
+                  condition:
+                    type: Developer
+                    status: "False"
+                    reason: CloudRunFailed
+                    message: "{{ .ErrorMsg }}"
+              createEvents:
+                - target: CompositeAndClaim
+                  event:
+                    type: Warning
+                    reason: CloudRunFailed
+                    message: "Cloud Run failed"
+
+            # 12. GCPCloudRun - Any Synced/Ready failure (fallback)
             - matchers:
                 - resources:
                     - name: "gcp-cloudrun-xr"
@@ -271,10 +412,15 @@ spec:
                     reason: CloudRunFailed
                     message: "Cloud Run failed"
 
-            # 10. All child XRs healthy - Success condition (placed LAST with force: true)
+            # 13. All child XRs healthy - Success condition (placed LAST with force: true)
             - matchers:
                 - resources:
                     - name: "gcp-project-xr"
+                  conditions:
+                    - type: Ready
+                      status: "True"
+                - resources:
+                    - name: "gcp-identity-xr"
                   conditions:
                     - type: Ready
                       status: "True"

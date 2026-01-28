@@ -123,6 +123,12 @@ spec:
           required:
             - spec
       additionalPrinterColumns:
+        - name: READY
+          type: string
+          jsonPath: .status.conditions[?(@.type=='Ready')].status
+        - name: SYNCED
+          type: string
+          jsonPath: .status.conditions[?(@.type=='Synced')].status
         - name: PROJECT
           type: string
           jsonPath: .status.projectId
@@ -132,4 +138,4 @@ spec:
         - name: MESSAGE
           type: string
           priority: 1
-          jsonPath: .status.conditions[?(@.type=='Ready')].message
+          jsonPath: .status.conditions[?(@.type=='Developer')].message

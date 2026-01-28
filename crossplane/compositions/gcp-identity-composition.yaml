@@ -77,6 +77,92 @@ spec:
                     fmt: 'serviceAccount:%s'
                 toFieldPath: spec.forProvider.member
 
+    - step: status-handler
+      functionRef:
+        name: function-status-transformer
+      input:
+        apiVersion: function-status-transformer.fn.crossplane.io/v1beta1
+        kind: StatusTransformation
+        statusConditionHooks:
+          # Service Account creation errors - Extract and pass upstream
+          - matchers:
+              - resources:
+                  - name: "service-account"
+                conditions:
+                  - type: Synced
+                    status: "False"
+                    reason: ReconcileError
+                    message: "(?P<ErrorMsg>.*)"
+            setConditions:
+              - target: CompositeAndClaim
+                force: true
+                condition:
+                  type: Developer
+                  status: "False"
+                  reason: ServiceAccountFailed
+                  message: "Service Account creation failed: {{ .ErrorMsg }}"
+            createEvents:
+              - target: CompositeAndClaim
+                event:
+                  type: Warning
+                  reason: ServiceAccountFailed
+                  message: "Service Account creation failed"
+
+          # IAM binding errors - Extract and pass upstream
+          - matchers:
+              - resources:
+                  - name: "iam-binding"
+                conditions:
+                  - type: Synced
+                    status: "False"
+                    reason: ReconcileError
+                    message: "(?P<ErrorMsg>.*)"
+            setConditions:
+              - target: CompositeAndClaim
+                force: true
+                condition:
+                  type: Developer
+                  status: "False"
+                  reason: IAMBindingFailed
+                  message: "IAM binding failed: {{ .ErrorMsg }}"
+            createEvents:
+              - target: CompositeAndClaim
+                event:
+                  type: Warning
+                  reason: IAMBindingFailed
+                  message: "IAM binding failed"
+
+          # Success condition - All resources synced and ready
+          - matchers:
+              - resources:
+                  - name: "service-account"
+                conditions:
+                  - type: Synced
+                    status: "True"
+                  - type: Ready
+                    status: "True"
+              - resources:
+                  - name: "iam-binding"
+                conditions:
+                  - type: Synced
+                    status: "True"
+                  - type: Ready
+                    status: "True"
+            setConditions:
+              - target: CompositeAndClaim
+                force: false
+                condition:
+                  type: Developer
+                  status: "True"
+                  reason: IdentityReady
+                  message: "Service account and IAM bindings successfully configured"
+            createEvents:
+              - target: CompositeAndClaim
+                event:
+                  type: Normal
+                  reason: IdentityReady
+                  message: "Identity resources successfully provisioned"
+
     - step: auto-ready
       functionRef:
         name: function-auto-ready
