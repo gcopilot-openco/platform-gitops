@@ -1,0 +1,17 @@
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: test-status-propagation
+  namespace: demo
+spec:
+  appName: status-test
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  cloudRun:
+    enabled: true
+    port: 8080
+    public: false
+  secretManager:
+    enabled: true
+    secrets: []
