@@ -66,8 +66,21 @@ spec:
               - type: ToCompositeFieldPath
                 fromFieldPath: status.atProvider.number
                 toFieldPath: status.projectNumber
-              - fromFieldPath: spec.deletionPolicy
+              # Dynamic deletion policy: ABANDON for sandbox (fast iteration), DELETE for hml/prod (proper cleanup)
+              - type: CombineFromComposite
+                combine:
+                  variables:
+                    - fromFieldPath: spec.environment
+                  strategy: string
+                  string:
+                    fmt: '%s'
                 toFieldPath: spec.forProvider.deletionPolicy
+                transforms:
+                  - type: map
+                    map:
+                      sandbox: ABANDON
+                      hml: DELETE
+                      prod: DELETE
 
           - name: sharedvpc-service-project
             base:
