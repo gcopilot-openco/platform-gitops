@@ -27,9 +27,9 @@ spec:
               properties:
                 appName:
                   type: string
-                  description: The name of the application (e.g., payment-service)
+                  description: The name of the application (e.g., payment-service). Minimum 4 chars required for GCP Service Account naming (sa-{appName} must be 6-30 chars).
                   pattern: '^[a-z][a-z0-9-]*[a-z0-9]$'
-                  minLength: 1
+                  minLength: 4
                   maxLength: 63
                 environment:
                   type: string

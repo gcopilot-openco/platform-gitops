@@ -35,13 +35,14 @@ spec:
 ---
 # Test: gcp-fail-duplicate-project
 # Description: Attempt to create a GCP project that already exists
+# Note: This creates a SECOND GCPProject XR with the same appName+environment
+# as an existing project to test duplicate detection
 # Expected GCP Error:
 #   - Error 409: Project already exists
 #   - Or: The requested project ID is already in use
 # Expected Composite Status:
 #   - status.conditions[Developer].status: "False"
 #   - status.conditions[Developer].message: Contains ALREADY_EXISTS or similar
-# Note: This will conflict with happy-sandbox-minimal if run after it
 apiVersion: platform.openco.tech/v1alpha1
 kind: GCPProject
 metadata:
@@ -53,7 +54,7 @@ metadata:
     cost-center: "12345"
     test-category: gcp-failure
 spec:
-  appName: sandbox-minimal  # Same as happy-sandbox-minimal
+  appName: status-test2  # Same appName as test-status-propagation (creates prj-sandbox-status-test2)
   environment: sandbox
   teamId: platform
   costCenter: "12345"

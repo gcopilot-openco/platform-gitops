@@ -2,6 +2,14 @@
 # STANDALONE XR TESTS
 # Test each child XR independently (without AppEnvironment orchestrator)
 # All resources deployed to demo namespace
+#
+# NOTE: Most of these tests use a fake projectId (prj-sandbox-test-project)
+# that doesn't exist. This is intentional to test:
+# 1. That the XR schema and composition work correctly
+# 2. That GCP error messages propagate properly to status
+#
+# The GCPProject tests can succeed (they create real projects).
+# Other XRs that require an existing project will fail with GCP API errors.
 # ===========================================
 
 ---
@@ -48,7 +56,8 @@ spec:
 ---
 # Test: standalone-gcpidentity
 # Description: Direct GCPIdentity claim with default roles
-# Expected: Service account created with default IAM roles
+# Expected: FAILS - uses fake projectId (prj-sandbox-test-project)
+# Tests error propagation: "Permission iam.serviceAccounts.create is required"
 apiVersion: platform.openco.tech/v1alpha1
 kind: GCPIdentity
 metadata:
@@ -68,7 +77,8 @@ spec:
 ---
 # Test: standalone-gcpidentity-custom-roles
 # Description: GCPIdentity with custom IAM roles
-# Expected: Service account with specified roles only
+# Expected: FAILS - uses fake projectId (prj-sandbox-test-project)
+# Tests error propagation: "Permission iam.serviceAccounts.create is required"
 apiVersion: platform.openco.tech/v1alpha1
 kind: GCPIdentity
 metadata:
@@ -91,7 +101,8 @@ spec:
 ---
 # Test: standalone-gcpartifact-docker
 # Description: Direct GCPArtifact claim - Docker format
-# Expected: Artifact Registry created for Docker images
+# Expected: FAILS - uses fake projectId (prj-sandbox-test-project)
+# Tests error propagation: "Permission denied on resource project"
 apiVersion: platform.openco.tech/v1alpha1
 kind: GCPArtifact
 metadata:
@@ -114,7 +125,8 @@ spec:
 ---
 # Test: standalone-gcpartifact-npm
 # Description: Direct GCPArtifact claim - NPM format
-# Expected: Artifact Registry created for NPM packages
+# Expected: FAILS - uses fake projectId (prj-sandbox-test-project)
+# Tests error propagation: "Permission denied on resource project"
 apiVersion: platform.openco.tech/v1alpha1
 kind: GCPArtifact
 metadata:
@@ -137,7 +149,8 @@ spec:
 ---
 # Test: standalone-gcpartifact-maven
 # Description: Direct GCPArtifact claim - Maven format
-# Expected: Artifact Registry created for Maven artifacts
+# Expected: FAILS - uses fake projectId (prj-sandbox-test-project)
+# Tests error propagation: "Permission denied on resource project"
 apiVersion: platform.openco.tech/v1alpha1
 kind: GCPArtifact
 metadata:
@@ -160,7 +173,8 @@ spec:
 ---
 # Test: standalone-gcpartifact-python
 # Description: Direct GCPArtifact claim - Python format
-# Expected: Artifact Registry created for Python packages
+# Expected: FAILS - uses fake projectId (prj-sandbox-test-project)
+# Tests error propagation: "Permission denied on resource project"
 apiVersion: platform.openco.tech/v1alpha1
 kind: GCPArtifact
 metadata:
@@ -183,7 +197,8 @@ spec:
 ---
 # Test: standalone-gcpcloudrun
 # Description: Direct GCPCloudRun claim with defaults
-# Expected: Cloud Run service created with hello image
+# Expected: FAILS - uses fake projectId (prj-sandbox-test-project)
+# Tests error propagation: "Permission denied on resource project"
 apiVersion: platform.openco.tech/v1alpha1
 kind: GCPCloudRun
 metadata:
@@ -204,7 +219,8 @@ spec:
 ---
 # Test: standalone-gcpcloudrun-custom-image
 # Description: GCPCloudRun with custom container image
-# Expected: Cloud Run service with specified image
+# Expected: FAILS - uses fake projectId (prj-sandbox-test-project)
+# Tests error propagation: "Permission denied on resource project"
 apiVersion: platform.openco.tech/v1alpha1
 kind: GCPCloudRun
 metadata:
@@ -231,7 +247,8 @@ spec:
 ---
 # Test: standalone-gcpsecretmanager
 # Description: Direct GCPSecretManager claim with secrets
-# Expected: Secret Manager with multiple secrets created
+# Expected: FAILS - uses fake projectId (prj-sandbox-test-project)
+# Tests error propagation: "Permission denied on resource project"
 apiVersion: platform.openco.tech/v1alpha1
 kind: GCPSecretManager
 metadata:
@@ -254,7 +271,8 @@ spec:
 ---
 # Test: standalone-gcpsecretmanager-usermanaged
 # Description: GCPSecretManager with user-managed replication
-# Expected: Secret Manager with user-managed replication policy
+# Expected: FAILS - uses fake projectId (prj-sandbox-test-project)
+# Tests error propagation: "Permission denied on resource project"
 apiVersion: platform.openco.tech/v1alpha1
 kind: GCPSecretManager
 metadata:

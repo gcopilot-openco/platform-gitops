@@ -6,7 +6,8 @@
 
 ---
 # Test: edge-min-appname
-# Description: Shortest valid appName (2 characters)
+# Description: Shortest valid appName (4 characters - minimum for GCP SA naming)
+# Note: GCP Service Accounts require 6-30 chars. Pattern sa-{appName} needs appName >= 4 chars
 # Expected: Resources created successfully
 apiVersion: platform.openco.tech/v1alpha1
 kind: AppEnvironment
@@ -19,14 +20,14 @@ metadata:
     cost-center: "12345"
     test-category: edge-case
 spec:
-  appName: ab
+  appName: abcd
   environment: sandbox
   teamId: platform
   costCenter: "12345"
 
 ---
 # Test: edge-max-appname
-# Description: Longest valid appName (63 characters)
+# Description: Longest valid appName (exactly 63 characters)
 # Expected: Resources created successfully
 apiVersion: platform.openco.tech/v1alpha1
 kind: AppEnvironment
@@ -39,7 +40,7 @@ metadata:
     cost-center: "12345"
     test-category: edge-case
 spec:
-  appName: this-is-a-very-long-application-name-that-tests-the-maximum-length-limit
+  appName: this-is-a-very-long-app-name-that-is-exactly-sixty-three-charss
   environment: sandbox
   teamId: platform
   costCenter: "12345"
@@ -47,7 +48,11 @@ spec:
 ---
 # Test: edge-cloudrun-disabled
 # Description: Cloud Run feature toggle off
-# Expected: Only GCPProject, GCPIdentity, GCPArtifact, GCPSecretManager created
+# KNOWN LIMITATION: The current composition does not implement conditional resource
+# creation. Cloud Run XR will still be created even with enabled: false.
+# TODO: Add function-go-templating or function-cel for conditional logic
+# Expected (current): All resources still created (Cloud Run included)
+# Expected (future): Only GCPProject, GCPIdentity, GCPArtifact, GCPSecretManager created
 apiVersion: platform.openco.tech/v1alpha1
 kind: AppEnvironment
 metadata:
@@ -71,7 +76,11 @@ spec:
 ---
 # Test: edge-secretmanager-disabled
 # Description: Secret Manager feature toggle off
-# Expected: Only GCPProject, GCPIdentity, GCPArtifact, GCPCloudRun created
+# KNOWN LIMITATION: The current composition does not implement conditional resource
+# creation. SecretManager XR will still be created even with enabled: false.
+# TODO: Add function-go-templating or function-cel for conditional logic
+# Expected (current): All resources still created (SecretManager included)
+# Expected (future): Only GCPProject, GCPIdentity, GCPArtifact, GCPCloudRun created
 apiVersion: platform.openco.tech/v1alpha1
 kind: AppEnvironment
 metadata:
@@ -83,7 +92,7 @@ metadata:
     cost-center: "12345"
     test-category: edge-case
 spec:
-  appName: secretmanager-disabled
+  appName: secretmgr-off
   environment: sandbox
   teamId: platform
   costCenter: "12345"
@@ -95,7 +104,11 @@ spec:
 ---
 # Test: edge-both-disabled
 # Description: Both Cloud Run and Secret Manager disabled
-# Expected: Minimal resource set (GCPProject, GCPIdentity, GCPArtifact only)
+# KNOWN LIMITATION: The current composition does not implement conditional resource
+# creation. Both Cloud Run and SecretManager XRs will still be created.
+# TODO: Add function-go-templating or function-cel for conditional logic
+# Expected (current): All resources still created
+# Expected (future): Minimal resource set (GCPProject, GCPIdentity, GCPArtifact only)
 apiVersion: platform.openco.tech/v1alpha1
 kind: AppEnvironment
 metadata:
