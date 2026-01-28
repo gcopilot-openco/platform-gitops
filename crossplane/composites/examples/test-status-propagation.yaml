@@ -4,7 +4,7 @@ metadata:
   name: test-status-propagation
   namespace: demo
 spec:
-  appName: status-test
+  appName: status-test2
   environment: sandbox
   teamId: platform
   costCenter: "12345"
