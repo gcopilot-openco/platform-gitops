@@ -1,0 +1,273 @@
+# ===========================================
+# STANDALONE XR TESTS
+# Test each child XR independently (without AppEnvironment orchestrator)
+# All resources deployed to demo namespace
+# ===========================================
+
+---
+# Test: standalone-gcpproject-sandbox
+# Description: Direct GCPProject claim for sandbox
+# Expected: GCP project created with default billing/org
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPProject
+metadata:
+  name: standalone-gcpproject-sandbox
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: standalone
+spec:
+  appName: standalone-project-sandbox
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+
+---
+# Test: standalone-gcpproject-custom-billing
+# Description: GCPProject with custom billing account
+# Expected: GCP project created with specified billing
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPProject
+metadata:
+  name: standalone-gcpproject-custom-billing
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: standalone
+spec:
+  appName: standalone-project-billing
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  billingAccount: "0182B4-2FC191-0FCF10"
+
+---
+# Test: standalone-gcpidentity
+# Description: Direct GCPIdentity claim with default roles
+# Expected: Service account created with default IAM roles
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPIdentity
+metadata:
+  name: standalone-gcpidentity
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: standalone
+spec:
+  appName: standalone-identity
+  projectId: prj-sandbox-test-project
+  teamId: platform
+  environment: sandbox
+
+---
+# Test: standalone-gcpidentity-custom-roles
+# Description: GCPIdentity with custom IAM roles
+# Expected: Service account with specified roles only
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPIdentity
+metadata:
+  name: standalone-gcpidentity-custom-roles
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: standalone
+spec:
+  appName: standalone-identity-roles
+  projectId: prj-sandbox-test-project
+  teamId: platform
+  environment: sandbox
+  roles:
+    - roles/viewer
+    - roles/storage.objectViewer
+
+---
+# Test: standalone-gcpartifact-docker
+# Description: Direct GCPArtifact claim - Docker format
+# Expected: Artifact Registry created for Docker images
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPArtifact
+metadata:
+  name: standalone-gcpartifact-docker
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: standalone
+spec:
+  appName: standalone-artifact-docker
+  projectId: prj-sandbox-test-project
+  region: us-east4
+  format: DOCKER
+  teamId: platform
+  environment: sandbox
+  costCenter: "12345"
+
+---
+# Test: standalone-gcpartifact-npm
+# Description: Direct GCPArtifact claim - NPM format
+# Expected: Artifact Registry created for NPM packages
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPArtifact
+metadata:
+  name: standalone-gcpartifact-npm
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: standalone
+spec:
+  appName: standalone-artifact-npm
+  projectId: prj-sandbox-test-project
+  region: us-east4
+  format: NPM
+  teamId: platform
+  environment: sandbox
+  costCenter: "12345"
+
+---
+# Test: standalone-gcpartifact-maven
+# Description: Direct GCPArtifact claim - Maven format
+# Expected: Artifact Registry created for Maven artifacts
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPArtifact
+metadata:
+  name: standalone-gcpartifact-maven
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: standalone
+spec:
+  appName: standalone-artifact-maven
+  projectId: prj-sandbox-test-project
+  region: us-east4
+  format: MAVEN
+  teamId: platform
+  environment: sandbox
+  costCenter: "12345"
+
+---
+# Test: standalone-gcpartifact-python
+# Description: Direct GCPArtifact claim - Python format
+# Expected: Artifact Registry created for Python packages
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPArtifact
+metadata:
+  name: standalone-gcpartifact-python
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: standalone
+spec:
+  appName: standalone-artifact-python
+  projectId: prj-sandbox-test-project
+  region: us-east4
+  format: PYTHON
+  teamId: platform
+  environment: sandbox
+  costCenter: "12345"
+
+---
+# Test: standalone-gcpcloudrun
+# Description: Direct GCPCloudRun claim with defaults
+# Expected: Cloud Run service created with hello image
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPCloudRun
+metadata:
+  name: standalone-gcpcloudrun
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: standalone
+spec:
+  appName: standalone-cloudrun
+  projectId: prj-sandbox-test-project
+  region: us-east4
+  teamId: platform
+  environment: sandbox
+
+---
+# Test: standalone-gcpcloudrun-custom-image
+# Description: GCPCloudRun with custom container image
+# Expected: Cloud Run service with specified image
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPCloudRun
+metadata:
+  name: standalone-gcpcloudrun-custom-image
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: standalone
+spec:
+  appName: standalone-cloudrun-image
+  projectId: prj-sandbox-test-project
+  region: us-east4
+  image: gcr.io/cloudrun/hello
+  port: 8080
+  cpu: "1000m"
+  memory: "512Mi"
+  minInstances: 0
+  maxInstances: 10
+  teamId: platform
+  environment: sandbox
+
+---
+# Test: standalone-gcpsecretmanager
+# Description: Direct GCPSecretManager claim with secrets
+# Expected: Secret Manager with multiple secrets created
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPSecretManager
+metadata:
+  name: standalone-gcpsecretmanager
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: standalone
+spec:
+  appName: standalone-secretmanager
+  projectId: prj-sandbox-test-project
+  replication: automatic
+  secrets:
+    - name: db-password
+    - name: api-key
+    - name: jwt-secret
+
+---
+# Test: standalone-gcpsecretmanager-usermanaged
+# Description: GCPSecretManager with user-managed replication
+# Expected: Secret Manager with user-managed replication policy
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPSecretManager
+metadata:
+  name: standalone-gcpsecretmanager-usermanaged
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: standalone
+spec:
+  appName: standalone-secretmanager-user
+  projectId: prj-sandbox-test-project
+  replication: user_managed
+  secrets:
+    - name: manual-secret

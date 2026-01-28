@@ -1,0 +1,185 @@
+# ===========================================
+# GCP FAILURE TESTS
+# These tests have VALID Kubernetes schema but will FAIL at GCP API level
+# They test error propagation from GCP back to the composite status
+#
+# IMPORTANT: These are intentionally designed to fail at GCP!
+# The expected errors should appear in the Developer condition and status.message
+# ===========================================
+
+---
+# Test: gcp-fail-invalid-projectid
+# Description: GCPIdentity referencing a non-existent GCP project
+# Expected GCP Error:
+#   - Error 404: Project 'non-existent-project-12345' not found
+# Expected Composite Status:
+#   - status.conditions[Developer].status: "False"
+#   - status.conditions[Developer].message: Contains GCP error details
+#   - status.message: Human-readable error about project not found
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPIdentity
+metadata:
+  name: gcp-fail-invalid-projectid
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: gcp-failure
+spec:
+  appName: invalid-project-ref
+  projectId: non-existent-project-12345  # This project does not exist
+  teamId: platform
+  environment: sandbox
+
+---
+# Test: gcp-fail-duplicate-project
+# Description: Attempt to create a GCP project that already exists
+# Expected GCP Error:
+#   - Error 409: Project already exists
+#   - Or: The requested project ID is already in use
+# Expected Composite Status:
+#   - status.conditions[Developer].status: "False"
+#   - status.conditions[Developer].message: Contains ALREADY_EXISTS or similar
+# Note: This will conflict with happy-sandbox-minimal if run after it
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPProject
+metadata:
+  name: gcp-fail-duplicate-project
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: gcp-failure
+spec:
+  appName: sandbox-minimal  # Same as happy-sandbox-minimal
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+
+---
+# Test: gcp-fail-invalid-billing
+# Description: GCP project with invalid billing account ID
+# Expected GCP Error:
+#   - Error 400: Billing account not found or permission denied
+#   - Or: Invalid billing account
+# Expected Composite Status:
+#   - status.conditions[Developer].status: "False"
+#   - status.conditions[Developer].message: Contains billing error details
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPProject
+metadata:
+  name: gcp-fail-invalid-billing
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: gcp-failure
+spec:
+  appName: invalid-billing
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  billingAccount: INVALID-BILLING-ACCOUNT-ID  # Invalid format
+
+---
+# Test: gcp-fail-invalid-orgid
+# Description: GCP project with invalid organization ID
+# Expected GCP Error:
+#   - Error 400: Organization not found
+#   - Or: Invalid organization ID
+# Expected Composite Status:
+#   - status.conditions[Developer].status: "False"
+#   - status.conditions[Developer].message: Contains organization error
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPProject
+metadata:
+  name: gcp-fail-invalid-orgid
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: gcp-failure
+spec:
+  appName: invalid-org
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  orgId: "999999999999"  # Non-existent organization
+
+---
+# Test: gcp-fail-invalid-sa-email
+# Description: Cloud Run with non-existent service account email
+# Expected GCP Error:
+#   - Error 400: Service account does not exist
+#   - Or: Invalid service account
+# Expected Composite Status:
+#   - status.conditions[Developer].status: "False"
+#   - status.conditions[Developer].message: Contains service account error
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPCloudRun
+metadata:
+  name: gcp-fail-invalid-sa-email
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: gcp-failure
+spec:
+  appName: invalid-sa
+  projectId: prj-sandbox-test-project
+  region: us-east4
+  serviceAccountEmail: nonexistent@invalid-project.iam.gserviceaccount.com  # Invalid SA
+
+---
+# Test: gcp-fail-invalid-region
+# Description: Resources in invalid/non-existent GCP region
+# Expected GCP Error:
+#   - Error 400: Invalid region
+#   - Or: Location not found
+# Expected Composite Status:
+#   - status.conditions[Developer].status: "False"
+#   - status.conditions[Developer].message: Contains region error
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPCloudRun
+metadata:
+  name: gcp-fail-invalid-region
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: gcp-failure
+spec:
+  appName: invalid-region
+  projectId: prj-sandbox-test-project
+  region: invalid-region-xyz  # Non-existent region
+
+---
+# Test: gcp-fail-invalid-image
+# Description: Cloud Run with non-existent container image
+# Expected GCP Error:
+#   - Error 400: Image not found
+#   - Or: Failed to pull image
+# Expected Composite Status:
+#   - status.conditions[Developer].status: "False"
+#   - status.conditions[Developer].message: Contains image pull error
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPCloudRun
+metadata:
+  name: gcp-fail-invalid-image
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: gcp-failure
+spec:
+  appName: invalid-image
+  projectId: prj-sandbox-test-project
+  region: us-east4
+  image: gcr.io/non-existent-project/invalid-image:latest  # Non-existent image

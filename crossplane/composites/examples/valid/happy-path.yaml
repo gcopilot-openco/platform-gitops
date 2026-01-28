@@ -1,0 +1,115 @@
+# ===========================================
+# HAPPY PATH TESTS
+# Valid configurations that should work end-to-end
+# All resources deployed to demo namespace
+# ===========================================
+
+---
+# Test: happy-sandbox-minimal
+# Description: Sandbox environment with only required fields
+# Expected: All resources created with defaults
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: happy-sandbox-minimal
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: happy-path
+spec:
+  appName: sandbox-minimal
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+
+---
+# Test: happy-hml-standard
+# Description: HML environment with standard configuration
+# Expected: All resources created with typical HML settings
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: happy-hml-standard
+  namespace: demo
+  labels:
+    team: platform
+    env: hml
+    cost-center: "12345"
+    test-category: happy-path
+spec:
+  appName: hml-standard
+  environment: hml
+  teamId: platform
+  costCenter: "12345"
+  region: us-east4
+  cloudRun:
+    enabled: true
+    port: 8080
+    public: false
+  secretManager:
+    enabled: true
+    secrets:
+      - name: database-url
+      - name: api-key
+
+---
+# Test: happy-prod-hardened
+# Description: Production environment with security best practices
+# Expected: Private Cloud Run, all features enabled, proper secrets
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: happy-prod-hardened
+  namespace: demo
+  labels:
+    team: platform
+    env: prod
+    cost-center: "12345"
+    test-category: happy-path
+spec:
+  appName: prod-hardened
+  environment: prod
+  teamId: platform
+  costCenter: "12345"
+  region: us-east4
+  cloudRun:
+    enabled: true
+    port: 8080
+    public: false
+  secretManager:
+    enabled: true
+    secrets:
+      - name: db-password
+      - name: api-secret
+      - name: jwt-key
+
+---
+# Test: happy-all-defaults
+# Description: Verify every default value works correctly
+# Expected: Same result as happy-sandbox-minimal
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: happy-all-defaults
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: happy-path
+spec:
+  appName: all-defaults
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  # Explicitly setting defaults to verify they work
+  region: us-east4
+  cloudRun:
+    enabled: true
+    port: 8080
+    public: false
+  secretManager:
+    enabled: true
+    secrets: []

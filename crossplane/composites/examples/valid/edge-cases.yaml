@@ -1,0 +1,285 @@
+# ===========================================
+# EDGE CASE TESTS
+# Boundary conditions and unusual but valid configurations
+# All resources deployed to demo namespace
+# ===========================================
+
+---
+# Test: edge-min-appname
+# Description: Shortest valid appName (2 characters)
+# Expected: Resources created successfully
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: edge-min-appname
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: edge-case
+spec:
+  appName: ab
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+
+---
+# Test: edge-max-appname
+# Description: Longest valid appName (63 characters)
+# Expected: Resources created successfully
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: edge-max-appname
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: edge-case
+spec:
+  appName: this-is-a-very-long-application-name-that-tests-the-maximum-length-limit
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+
+---
+# Test: edge-cloudrun-disabled
+# Description: Cloud Run feature toggle off
+# Expected: Only GCPProject, GCPIdentity, GCPArtifact, GCPSecretManager created
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: edge-cloudrun-disabled
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: edge-case
+spec:
+  appName: cloudrun-disabled
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  cloudRun:
+    enabled: false
+  secretManager:
+    enabled: true
+
+---
+# Test: edge-secretmanager-disabled
+# Description: Secret Manager feature toggle off
+# Expected: Only GCPProject, GCPIdentity, GCPArtifact, GCPCloudRun created
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: edge-secretmanager-disabled
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: edge-case
+spec:
+  appName: secretmanager-disabled
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  cloudRun:
+    enabled: true
+  secretManager:
+    enabled: false
+
+---
+# Test: edge-both-disabled
+# Description: Both Cloud Run and Secret Manager disabled
+# Expected: Minimal resource set (GCPProject, GCPIdentity, GCPArtifact only)
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: edge-both-disabled
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: edge-case
+spec:
+  appName: both-disabled
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  cloudRun:
+    enabled: false
+  secretManager:
+    enabled: false
+
+---
+# Test: edge-public-cloudrun
+# Description: Public Cloud Run service (allUsers can invoke)
+# Expected: Cloud Run service with public IAM binding
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: edge-public-cloudrun
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: edge-case
+spec:
+  appName: public-cloudrun
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  cloudRun:
+    enabled: true
+    port: 8080
+    public: true
+
+---
+# Test: edge-custom-port
+# Description: Non-standard container port
+# Expected: Cloud Run service configured for port 3000
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: edge-custom-port
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: edge-case
+spec:
+  appName: custom-port
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  cloudRun:
+    enabled: true
+    port: 3000
+    public: false
+
+---
+# Test: edge-custom-region
+# Description: Non-default GCP region
+# Expected: All resources created in us-central1
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: edge-custom-region
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: edge-case
+spec:
+  appName: custom-region
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  region: us-central1
+
+---
+# Test: edge-zero-min-instances
+# Description: Scale to zero enabled (minInstances: 0)
+# Expected: Cloud Run scales to zero when idle
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: edge-zero-min-instances
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: edge-case
+spec:
+  appName: zero-min-instances
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  cloudRun:
+    enabled: true
+    port: 8080
+    public: false
+
+---
+# Test: edge-high-max-instances
+# Description: High scale limit (maxInstances: 100)
+# Expected: Cloud Run can scale up to 100 instances
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: edge-high-max-instances
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: edge-case
+spec:
+  appName: high-max-instances
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  cloudRun:
+    enabled: true
+    port: 8080
+    public: false
+
+---
+# Test: edge-empty-secrets
+# Description: Empty secrets array
+# Expected: Secret Manager enabled but no secrets created
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: edge-empty-secrets
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: edge-case
+spec:
+  appName: empty-secrets
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  secretManager:
+    enabled: true
+    secrets: []
+
+---
+# Test: edge-multiple-secrets
+# Description: Multiple secrets to test array handling
+# Expected: All 5 secrets created in Secret Manager
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: edge-multiple-secrets
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: edge-case
+spec:
+  appName: multiple-secrets
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+  secretManager:
+    enabled: true
+    secrets:
+      - name: secret-one
+      - name: secret-two
+      - name: secret-three
+      - name: secret-four
+      - name: secret-five

@@ -1,0 +1,316 @@
+# ===========================================
+# VALIDATION FAILURE TESTS
+# These tests have INVALID configurations that should be REJECTED by the API
+# They will fail to sync in ArgoCD with clear error messages
+# 
+# IMPORTANT: These are intentionally invalid - do not expect them to work!
+# The expected errors are documented in comments for each test
+# ===========================================
+
+# ===========================================
+# MISSING REQUIRED FIELDS
+# ===========================================
+
+---
+# Test: invalid-missing-appname
+# Description: Missing required field 'appName'
+# Expected ArgoCD Error: 
+#   - Sync failed: spec.appName: Required value
+#   - Condition: Synced=False with message about missing required field
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: invalid-missing-appname
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: validation-failure
+spec:
+  # appName is REQUIRED but omitted
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+
+---
+# Test: invalid-missing-environment
+# Description: Missing required field 'environment'
+# Expected ArgoCD Error:
+#   - Sync failed: spec.environment: Required value
+#   - Condition: Synced=False
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: invalid-missing-environment
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: validation-failure
+spec:
+  appName: missing-environment
+  # environment is REQUIRED but omitted
+  teamId: platform
+  costCenter: "12345"
+
+---
+# Test: invalid-missing-teamid
+# Description: Missing required field 'teamId'
+# Expected ArgoCD Error:
+#   - Sync failed: spec.teamId: Required value
+#   - Condition: Synced=False
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: invalid-missing-teamid
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: validation-failure
+spec:
+  appName: missing-teamid
+  environment: sandbox
+  # teamId is REQUIRED but omitted
+  costCenter: "12345"
+
+---
+# Test: invalid-missing-costcenter
+# Description: Missing required field 'costCenter'
+# Expected ArgoCD Error:
+#   - Sync failed: spec.costCenter: Required value
+#   - Condition: Synced=False
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: invalid-missing-costcenter
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: validation-failure
+spec:
+  appName: missing-costcenter
+  environment: sandbox
+  teamId: platform
+  # costCenter is REQUIRED but omitted
+
+# ===========================================
+# INVALID ENUM VALUES
+# ===========================================
+
+---
+# Test: invalid-enum-environment
+# Description: Invalid enum value for 'environment'
+# Valid values: hml, prod, sandbox
+# Expected ArgoCD Error:
+#   - Sync failed: spec.environment: Unsupported value: "staging"
+#   - Message should list valid values
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: invalid-enum-environment
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: validation-failure
+spec:
+  appName: invalid-env
+  environment: staging  # INVALID: must be hml, prod, or sandbox
+  teamId: platform
+  costCenter: "12345"
+
+---
+# Test: invalid-enum-format
+# Description: Invalid enum value for GCPArtifact format
+# Valid values: DOCKER, NPM, MAVEN, PYTHON
+# Expected ArgoCD Error:
+#   - Sync failed: spec.format: Unsupported value: "JAR"
+#   - Message should list valid values
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPArtifact
+metadata:
+  name: invalid-enum-format
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: validation-failure
+spec:
+  appName: invalid-format
+  projectId: prj-sandbox-test-project
+  format: JAR  # INVALID: must be DOCKER, NPM, MAVEN, or PYTHON
+
+---
+# Test: invalid-enum-replication
+# Description: Invalid enum value for GCPSecretManager replication
+# Valid values: automatic, user_managed
+# Expected ArgoCD Error:
+#   - Sync failed: spec.replication: Unsupported value: "global"
+#   - Message should list valid values
+apiVersion: platform.openco.tech/v1alpha1
+kind: GCPSecretManager
+metadata:
+  name: invalid-enum-replication
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: validation-failure
+spec:
+  appName: invalid-replication
+  projectId: prj-sandbox-test-project
+  replication: global  # INVALID: must be automatic or user_managed
+
+# ===========================================
+# PATTERN VIOLATIONS (appName format)
+# Pattern: ^[a-z][a-z0-9-]*[a-z0-9]$
+# Rules:
+#   - Must start with lowercase letter
+#   - Can contain lowercase letters, numbers, hyphens
+#   - Must end with lowercase letter or number
+# ===========================================
+
+---
+# Test: invalid-pattern-starts-number
+# Description: appName starts with a number (violates pattern)
+# Expected ArgoCD Error:
+#   - Sync failed: spec.appName: Invalid value
+#   - Message: does not match pattern ^[a-z][a-z0-9-]*[a-z0-9]$
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: invalid-pattern-starts-number
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: validation-failure
+spec:
+  appName: 123-test  # INVALID: starts with number
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+
+---
+# Test: invalid-pattern-uppercase
+# Description: appName contains uppercase letters (violates pattern)
+# Expected ArgoCD Error:
+#   - Sync failed: spec.appName: Invalid value
+#   - Message: does not match pattern (must be lowercase)
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: invalid-pattern-uppercase
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: validation-failure
+spec:
+  appName: Test-App  # INVALID: contains uppercase
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+
+---
+# Test: invalid-pattern-underscore
+# Description: appName contains underscore (violates pattern)
+# Expected ArgoCD Error:
+#   - Sync failed: spec.appName: Invalid value
+#   - Message: does not match pattern (only hyphens allowed)
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: invalid-pattern-underscore
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: validation-failure
+spec:
+  appName: test_app  # INVALID: contains underscore
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+
+---
+# Test: invalid-pattern-ends-hyphen
+# Description: appName ends with hyphen (violates pattern)
+# Expected ArgoCD Error:
+#   - Sync failed: spec.appName: Invalid value
+#   - Message: does not match pattern (must end with letter/number)
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: invalid-pattern-ends-hyphen
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: validation-failure
+spec:
+  appName: test-  # INVALID: ends with hyphen
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+
+# ===========================================
+# LENGTH VIOLATIONS
+# ===========================================
+
+---
+# Test: invalid-maxlength-appname
+# Description: appName exceeds maximum length of 63 characters
+# Expected ArgoCD Error:
+#   - Sync failed: spec.appName: Too long
+#   - Message: must be at most 63 characters
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: invalid-maxlength-appname
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: validation-failure
+spec:
+  appName: this-is-an-extremely-long-application-name-that-exceeds-the-maximum-length-limit-of-sixty-three-characters  # INVALID: 64 characters
+  environment: sandbox
+  teamId: platform
+  costCenter: "12345"
+
+---
+# Test: invalid-maxlength-teamid
+# Description: teamId exceeds maximum length of 63 characters
+# Expected ArgoCD Error:
+#   - Sync failed: spec.teamId: Too long
+#   - Message: must be at most 63 characters
+apiVersion: platform.openco.tech/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: invalid-maxlength-teamid
+  namespace: demo
+  labels:
+    team: platform
+    env: sandbox
+    cost-center: "12345"
+    test-category: validation-failure
+spec:
+  appName: invalid-teamid-length
+  environment: sandbox
+  teamId: this-is-a-very-long-team-identifier-that-exceeds-the-maximum-length-limit-of-sixty-three-characters  # INVALID: 64 characters
+  costCenter: "12345"
